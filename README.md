@@ -10,7 +10,8 @@ Daniel Sepúlveda -> Integración <br>
 *descripcion de la problemática:
 La problemática de seguridad y ciudadanía se centra en la presencia de microtráfico, la ocupación de espacios
 abandonados para el consumo de alcohol y el maltrato animal. Estas situaciones generan un ambiente de inseguridad
-que afecta la calidad de vida de los ciudadanos
+que afecta la calidad de vida de los ciudadanos, ya que estos no disponen de ninguna plataforma para reportar los diferentes
+tipos de incidentes.
 
 Descripción de la solución propuesta:
 Desarrollaremos una app móvil y plataforma web enfocada en reportar, monitorear y coordinar respuestas a problemas
