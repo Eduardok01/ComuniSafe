@@ -2,10 +2,10 @@
 Repositorio contenedor de los datos del equipo 1 (segun discord) para el proyecto de comprensión del contexto social
 
 *Miembros del grupo:
-Carlos Cienfuegos -> Backend
-Eduardo Krause -> Líder técnico
-Marcelo Rebolledo -> Frontend
-Daniel Sepúlveda -> Integración
+Carlos Cienfuegos -> Backend <br>
+Eduardo Krause -> Líder técnico <br>
+Marcelo Rebolledo -> Frontend <br>
+Daniel Sepúlveda -> Integración <br>
 
 *descripcion de la problemática:
 La problemática de seguridad y ciudadanía se centra en la presencia de microtráfico, la ocupación de espacios
