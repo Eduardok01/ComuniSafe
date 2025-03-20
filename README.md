@@ -1,7 +1,7 @@
 # Equipo1.0_2025
 Repositorio contenedor de los datos del equipo 1 (segun discord) para el proyecto de comprensión del contexto social
 
-*Miembros del grupo:
+*Miembros del grupo: <br>
 Carlos Cienfuegos -> Backend <br>
 Eduardo Krause -> Líder técnico <br>
 Marcelo Rebolledo -> Frontend <br>
@@ -18,9 +18,9 @@ como microtráfico, inseguridad, ocupación indebida de terrenos y maltrato anim
 La herramienta permitirá reportes anónimos, alertas en tiempo real y coordinación con autoridades y organizaciones de apoyo.
 
 Tecnologias a utilizar:
--Backend: Node.js con Express o Django con PostgreSQL.
--Frontend Web: React.js o Vue.js.
--App Móvil: Flutter o React Native.
--Geolocalización: Google Maps API u OpenStreetMap.
--Notificaciones y Alertas: Firebase Cloud Messaging.
--Seguridad y Anonimato: Cifrado de datos para proteger la identidad de los denunciantes.
+-Backend: Node.js con Express o Django con PostgreSQL.<br>
+-Frontend Web: React.js o Vue.js.<br>
+-App Móvil: Flutter o React Native.<br>
+-Geolocalización: Google Maps API u OpenStreetMap.<br>
+-Notificaciones y Alertas: Firebase Cloud Messaging.<br>
+-Seguridad y Anonimato: Cifrado de datos para proteger la identidad de los denunciantes.<br>
