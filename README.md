@@ -17,7 +17,7 @@ Desarrollaremos una app móvil y plataforma web enfocada en reportar, monitorear
 como microtráfico, inseguridad, ocupación indebida de terrenos y maltrato animal. 
 La herramienta permitirá reportes anónimos, alertas en tiempo real y coordinación con autoridades y organizaciones de apoyo.
 
-Tecnologias a utilizar:
+Tecnologias a utilizar:<br>
 -Backend: Node.js con Express o Django con PostgreSQL.<br>
 -Frontend Web: React.js o Vue.js.<br>
 -App Móvil: Flutter o React Native.<br>
