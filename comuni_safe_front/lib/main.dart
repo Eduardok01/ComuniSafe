@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'views/login/login_view.dart';
+import 'package:comuni_safe_front/routes/app_routes.dart';
 
 void main() {
   runApp(const MyApp());
@@ -13,7 +13,8 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'ComuniSafe',
-      home: const LoginView(),
+      initialRoute: 'login',
+      routes: appRoutes,
     );
   }
 }

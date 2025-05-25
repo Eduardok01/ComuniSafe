@@ -68,7 +68,9 @@ class LoginForm extends StatelessWidget {
         ),
         const SizedBox(height: 8),
         TextButton(
-          onPressed: () {},
+          onPressed: () {
+            Navigator.pushNamed(context, 'register');
+          },
           child: const Text(
             'Regístrese aquí',
             style: TextStyle(color: Colors.blueAccent),
