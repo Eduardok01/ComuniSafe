@@ -36,7 +36,9 @@ class LoginForm extends StatelessWidget {
                 borderRadius: BorderRadius.circular(20),
               ),
             ),
-            onPressed: () {},
+            onPressed: () {
+              Navigator.pushReplacementNamed(context, 'home');
+            },
             child: const Text('Ingresar', style: TextStyle(color: Colors.black)),
           ),
         ),

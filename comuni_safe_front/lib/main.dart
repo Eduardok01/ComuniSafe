@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:comuni_safe_front/routes/app_routes.dart';
+import 'routes/app_routes.dart';
 
 void main() {
   runApp(const MyApp());
