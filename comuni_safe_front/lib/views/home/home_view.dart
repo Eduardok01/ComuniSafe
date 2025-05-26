@@ -13,10 +13,12 @@ class HomeView extends StatelessWidget {
           children: [
             Image.asset('assets/logo.png', height: 200),
             const SizedBox(height: 24),
-            _buildButton(Icons.phone, 'Contactos de emergencia'),
-            _buildButton(Icons.shield, 'Llamada rápida Carabineros'),
-            _buildButton(Icons.local_hospital, 'Llamada rápida Ambulancia'),
-            _buildButton(Icons.map, 'Ver el mapa'),
+            _buildButton(Icons.phone, 'Contactos de emergencia', () {
+              Navigator.pushNamed(context, 'emergency_contacts');
+            }),
+            _buildButton(Icons.shield, 'Llamada rápida Carabineros', () {}),
+            _buildButton(Icons.local_hospital, 'Llamada rápida Ambulancia', () {}),
+            _buildButton(Icons.map, 'Ver el mapa', () {}),
             const Spacer(),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -47,7 +49,7 @@ class HomeView extends StatelessWidget {
     );
   }
 
-  Widget _buildButton(IconData icon, String label) {
+  Widget _buildButton(IconData icon, String label, VoidCallback onPressed) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8),
       child: ElevatedButton.icon(
@@ -57,7 +59,7 @@ class HomeView extends StatelessWidget {
           minimumSize: const Size.fromHeight(50),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         ),
-        onPressed: () {},
+        onPressed: onPressed,
         icon: Icon(icon, color: Colors.black),
         label: Text(label, style: const TextStyle(color: Colors.black)),
       ),
