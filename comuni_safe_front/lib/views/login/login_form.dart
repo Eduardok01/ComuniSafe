@@ -1,9 +1,51 @@
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 
-class LoginForm extends StatelessWidget {
+class LoginForm extends StatefulWidget {
   const LoginForm({super.key});
 
   @override
+  State<LoginForm> createState() => _LoginFormState();
+}
+
+class _LoginFormState extends State<LoginForm> {
+  final _emailController = TextEditingController();
+  final _passwordController = TextEditingController();
+
+  Future<void> _login() async {
+    final email = _emailController.text.trim();
+    final password = _passwordController.text;
+    final url = Uri.parse(
+        'http://localhost:8080/api/auth/login');
+
+    try {
+      final response = await http.post(
+        url,
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({'email': email, 'password': password}),
+      );
+
+      if (response.statusCode == 200) {
+        // Éxito - ir al home
+        Navigator.pushReplacementNamed(context, 'home');
+      } else {
+        // Error - mostrar alerta
+        showDialog(
+          context: context,
+          builder: (_) =>
+              AlertDialog(
+                title: const Text('Error'),
+                content: Text('Login fallido: ${response.body}'),
+              ),
+        );
+      }
+    } catch (e) {
+      print('Error al conectar: $e');
+    }
+  }
+
+    @override
   Widget build(BuildContext context) {
     return Column(
       children: [
@@ -13,6 +55,7 @@ class LoginForm extends StatelessWidget {
         ),
         const SizedBox(height: 16),
         TextFormField(
+          controller: _emailController,
           decoration: const InputDecoration(
             labelText: 'Correo electrónico',
             border: OutlineInputBorder(),
@@ -20,6 +63,7 @@ class LoginForm extends StatelessWidget {
         ),
         const SizedBox(height: 12),
         TextFormField(
+          controller: _passwordController,
           obscureText: true,
           decoration: const InputDecoration(
             labelText: 'Contraseña',
@@ -30,15 +74,13 @@ class LoginForm extends StatelessWidget {
         SizedBox(
           width: double.infinity,
           child: ElevatedButton(
+            onPressed: _login,
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.yellow[600],
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(20),
               ),
             ),
-            onPressed: () {
-              Navigator.pushReplacementNamed(context, 'home');
-            },
             child: const Text('Ingresar', style: TextStyle(color: Colors.black)),
           ),
         ),
