@@ -17,7 +17,7 @@ class _LoginFormState extends State<LoginForm> {
     final email = _emailController.text.trim();
     final password = _passwordController.text;
     final url = Uri.parse(
-        'http://localhost:8080/api/auth/login'); // Ajusta la URL
+        'http://localhost:8080/api/auth/login');
 
     try {
       final response = await http.post(

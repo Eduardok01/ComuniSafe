@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 class RegisterView extends StatefulWidget {
   const RegisterView({super.key});
@@ -12,6 +14,54 @@ class _RegisterViewState extends State<RegisterView> {
   final TextEditingController passwordController = TextEditingController();
   final TextEditingController confirmPasswordController = TextEditingController();
   final TextEditingController phoneController = TextEditingController();
+
+  Future<void> _register() async {
+    final String email = emailController.text.trim();
+    final String password = passwordController.text;
+    final String confirmPassword = confirmPasswordController.text;
+    final String phone = phoneController.text.trim();
+    if (email.isEmpty || password.isEmpty || confirmPassword.isEmpty || phone.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Por favor, completa todos los campos')),
+      );
+      return;
+    }
+
+    if (password != confirmPassword) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Las contraseñas no coinciden')),
+      );
+      return;
+    }
+
+    try {
+      final url = Uri.parse('http://localhost:8080/api/auth/register'); 
+      final response = await http.post(
+        url,
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({
+          'email': email,
+          'password': password,
+          'phone': phone,
+        }),
+      );
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Registro exitoso')),
+        );
+        Navigator.pushReplacementNamed(context, 'home'); // Puedes cambiar a 'login' si prefieres
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error: ${response.statusCode}')),
+        );
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error de red: $e')),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -30,7 +80,6 @@ class _RegisterViewState extends State<RegisterView> {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  // Flecha para volver
                   Align(
                     alignment: Alignment.topLeft,
                     child: IconButton(
@@ -38,10 +87,7 @@ class _RegisterViewState extends State<RegisterView> {
                       onPressed: () => Navigator.pop(context),
                     ),
                   ),
-
                   const SizedBox(height: 8),
-
-                  // Título
                   const Text(
                     'Registro',
                     style: TextStyle(
@@ -50,42 +96,16 @@ class _RegisterViewState extends State<RegisterView> {
                       color: Colors.black87,
                     ),
                   ),
-
                   const SizedBox(height: 24),
-
-                  //Correo
                   buildTextField(label: 'Correo electrónico', controller: emailController),
-
-                  //Contraseña
-                  buildTextField(
-                    label: 'Contraseña',
-                    controller: passwordController,
-                    obscureText: true,
-                  ),
-
-                  // Confirmar contraseña
-                  buildTextField(
-                    label: 'Confirmar contraseña',
-                    controller: confirmPasswordController,
-                    obscureText: true,
-                  ),
-
-                  // Teléfono
-                  buildTextField(
-                    label: 'Teléfono',
-                    controller: phoneController,
-                    keyboardType: TextInputType.phone,
-                  ),
-
+                  buildTextField(label: 'Contraseña', controller: passwordController, obscureText: true),
+                  buildTextField(label: 'Confirmar contraseña', controller: confirmPasswordController, obscureText: true),
+                  buildTextField(label: 'Teléfono', controller: phoneController, keyboardType: TextInputType.phone),
                   const SizedBox(height: 24),
-
-                  // Botón Registrarse
                   ElevatedButton(
-                    onPressed: () {
-                      // logica futura
-                    },
+                    onPressed: _register,
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFFF7DF73), // Amarillo suave
+                      backgroundColor: const Color(0xFFF7DF73),
                       foregroundColor: Colors.black,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(30),
