@@ -11,7 +11,7 @@ import com.ufro.dto.RegisterRequest;
 import java.util.HashMap;
 import java.util.Map;
 
-@CrossOrigin(origins = "http://localhost:60393")
+@CrossOrigin(origins = "http://localhost:64030")
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {

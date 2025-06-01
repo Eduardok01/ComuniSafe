@@ -43,7 +43,7 @@ class _RegisterViewState extends State<RegisterView> {
           .createUserWithEmailAndPassword(email: email, password: password);
 
       String? idToken = await userCredential.user?.getIdToken();
-      
+
       final url = Uri.parse('http://localhost:8080/api/auth/register');
       final response = await http.post(
         url,

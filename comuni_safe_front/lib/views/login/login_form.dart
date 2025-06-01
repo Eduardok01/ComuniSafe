@@ -2,6 +2,8 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 
 class LoginForm extends StatefulWidget {
   const LoginForm({super.key});
@@ -65,6 +67,65 @@ class _LoginFormState extends State<LoginForm> {
     }
   }
 
+  Future<void> _signInWithGoogle() async {
+    try {
+      final GoogleSignIn googleSignIn = GoogleSignIn(
+        clientId: '654543001926-ou4pvidmql27vlkmhcb41ks3n9lbe3tc.apps.googleusercontent.com'
+      );
+      final GoogleSignInAccount? googleUser = await googleSignIn.signIn();
+
+      if (googleUser == null) {
+        print("Inicio de sesión con Google cancelado");
+        return;
+      }
+
+      final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
+
+      final credential = GoogleAuthProvider.credential(
+        accessToken: googleAuth.accessToken,
+        idToken: googleAuth.idToken,
+      );
+
+      final userCredential = await FirebaseAuth.instance.signInWithCredential(credential);
+      final idToken = await userCredential.user?.getIdToken();
+
+      if (idToken == null) throw Exception("No se pudo obtener el token de Google");
+
+      final url = Uri.parse('http://localhost:8080/api/auth/login');
+      final response = await http.post(
+        url,
+        headers: {
+          'Authorization': 'Bearer $idToken',
+          'Content-Type': 'application/json',
+        },
+      );
+
+      print('Respuesta backend: ${response.statusCode} - ${response.body}');
+
+      if (response.statusCode == 200) {
+        Navigator.pushReplacementNamed(context, 'home');
+      } else {
+        showDialog(
+          context: context,
+          builder: (_) => AlertDialog(
+            title: const Text('Error'),
+            content: Text('Login con Google fallido: ${response.body}'),
+          ),
+        );
+      }
+    } catch (e) {
+      print('Error con Google Sign-In: $e');
+      showDialog(
+        context: context,
+        builder: (_) => const AlertDialog(
+          title: Text('Error'),
+          content: Text('Error al intentar ingresar con Google.'),
+        ),
+      );
+    }
+  }
+
+
 
 
   @override
@@ -114,7 +175,7 @@ class _LoginFormState extends State<LoginForm> {
         ),
         const SizedBox(height: 12),
         ElevatedButton.icon(
-          onPressed: () {},
+          onPressed: _signInWithGoogle,
           style: ElevatedButton.styleFrom(
             backgroundColor: Colors.white,
             side: const BorderSide(color: Colors.grey),
