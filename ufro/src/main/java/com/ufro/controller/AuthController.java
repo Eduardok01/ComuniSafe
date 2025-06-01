@@ -11,7 +11,13 @@ import com.ufro.dto.RegisterRequest;
 import java.util.HashMap;
 import java.util.Map;
 
-@CrossOrigin(origins = "http://localhost:64030")
+@CrossOrigin(origins = {
+        "http://localhost:54795",
+        "http://localhost:8080",
+        "http://10.0.2.2:8080",
+        "https://comunisafe.web.app",
+        "https://comunisafe.app"
+})
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {
@@ -41,6 +47,7 @@ public class AuthController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Token inválido o expirado.");
         }
     }
+
     @PostMapping("/register")
     public ResponseEntity<?> register(
             @RequestHeader("Authorization") String authorizationHeader,
@@ -63,8 +70,6 @@ public class AuthController {
             System.out.println("Email: " + email);
             System.out.println("Nombre: " + name);
             System.out.println("Teléfono: " + phone);
-
-            // Aquí puedes almacenar esto en tu base de datos si tienes una.
 
             Map<String, Object> response = new HashMap<>();
             response.put("uid", uid);

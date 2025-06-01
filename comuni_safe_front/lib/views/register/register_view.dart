@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:firebase_auth/firebase_auth.dart';
-
+import 'package:comuni_safe_front/config/env_config.dart';
 class RegisterView extends StatefulWidget {
   const RegisterView({super.key});
 
@@ -44,7 +44,7 @@ class _RegisterViewState extends State<RegisterView> {
 
       String? idToken = await userCredential.user?.getIdToken();
 
-      final url = Uri.parse('http://localhost:8080/api/auth/register');
+      final url = Uri.parse('${EnvConfig.baseUrl}/api/auth/register');
       final response = await http.post(
         url,
         headers: {
