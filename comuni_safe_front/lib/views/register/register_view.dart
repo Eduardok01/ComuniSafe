@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class RegisterView extends StatefulWidget {
   const RegisterView({super.key});
@@ -10,6 +11,7 @@ class RegisterView extends StatefulWidget {
 }
 
 class _RegisterViewState extends State<RegisterView> {
+  final TextEditingController nameController = TextEditingController();
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
   final TextEditingController confirmPasswordController = TextEditingController();
@@ -20,7 +22,9 @@ class _RegisterViewState extends State<RegisterView> {
     final String password = passwordController.text;
     final String confirmPassword = confirmPasswordController.text;
     final String phone = phoneController.text.trim();
-    if (email.isEmpty || password.isEmpty || confirmPassword.isEmpty || phone.isEmpty) {
+    final String name = nameController.text.trim();
+
+    if (email.isEmpty || password.isEmpty || confirmPassword.isEmpty || phone.isEmpty || name.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Por favor, completa todos los campos')),
       );
@@ -35,13 +39,20 @@ class _RegisterViewState extends State<RegisterView> {
     }
 
     try {
-      final url = Uri.parse('http://localhost:8080/api/auth/register'); 
+      UserCredential userCredential = await FirebaseAuth.instance
+          .createUserWithEmailAndPassword(email: email, password: password);
+
+      String? idToken = await userCredential.user?.getIdToken();
+      
+      final url = Uri.parse('http://localhost:8080/api/auth/register');
       final response = await http.post(
         url,
-        headers: {'Content-Type': 'application/json'},
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $idToken',
+        },
         body: jsonEncode({
-          'email': email,
-          'password': password,
+          'name': name,
           'phone': phone,
         }),
       );
@@ -50,15 +61,15 @@ class _RegisterViewState extends State<RegisterView> {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Registro exitoso')),
         );
-        Navigator.pushReplacementNamed(context, 'home'); // Puedes cambiar a 'login' si prefieres
+        Navigator.pushReplacementNamed(context, 'home');
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: ${response.statusCode}')),
+          SnackBar(content: Text('Error en backend: ${response.statusCode}')),
         );
       }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error de red: $e')),
+        SnackBar(content: Text('Error al registrar: $e')),
       );
     }
   }
@@ -97,6 +108,7 @@ class _RegisterViewState extends State<RegisterView> {
                     ),
                   ),
                   const SizedBox(height: 24),
+                  buildTextField(label: 'Nombre completo', controller: nameController),
                   buildTextField(label: 'Correo electrónico', controller: emailController),
                   buildTextField(label: 'Contraseña', controller: passwordController, obscureText: true),
                   buildTextField(label: 'Confirmar contraseña', controller: confirmPasswordController, obscureText: true),
