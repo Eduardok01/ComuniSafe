@@ -8,13 +8,9 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Usuario {
-
-    private String id;
-
     private String name;
     private String phone;
     private String correo;
-    private String contrañesa;
-    private Boolean isAdmin;
-
+    private String contrasena;
+    private int edad;
 }
