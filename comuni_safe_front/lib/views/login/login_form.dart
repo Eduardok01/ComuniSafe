@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class LoginForm extends StatefulWidget {
   const LoginForm({super.key});
@@ -16,36 +17,57 @@ class _LoginFormState extends State<LoginForm> {
   Future<void> _login() async {
     final email = _emailController.text.trim();
     final password = _passwordController.text;
-    final url = Uri.parse(
-        'http://localhost:8080/api/auth/login');
+
+    print('Intentando login con: $email');
 
     try {
+      final userCredential = await FirebaseAuth.instance
+          .signInWithEmailAndPassword(email: email, password: password);
+
+      final idToken = await userCredential.user?.getIdToken();
+
+      if (idToken == null) {
+        throw Exception("No se pudo obtener el token");
+      }
+
+      final url = Uri.parse('http://localhost:8080/api/auth/login');
       final response = await http.post(
         url,
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({'email': email, 'password': password}),
+        headers: {
+          'Authorization': 'Bearer $idToken',
+          'Content-Type': 'application/json',
+        },
       );
 
+      print('Código de respuesta: ${response.statusCode}');
+      print('Respuesta: ${response.body}');
+
       if (response.statusCode == 200) {
-        // Éxito - ir al home
         Navigator.pushReplacementNamed(context, 'home');
       } else {
-        // Error - mostrar alerta
         showDialog(
           context: context,
-          builder: (_) =>
-              AlertDialog(
-                title: const Text('Error'),
-                content: Text('Login fallido: ${response.body}'),
-              ),
+          builder: (_) => AlertDialog(
+            title: const Text('Error'),
+            content: Text('Login fallido: ${response.body}'),
+          ),
         );
       }
     } catch (e) {
-      print('Error al conectar: $e');
+      print('Error durante el login: $e');
+      showDialog(
+        context: context,
+        builder: (_) => const AlertDialog(
+          title: Text('Error'),
+          content: Text('No se pudo conectar con el servidor o credenciales inválidas.'),
+        ),
+      );
     }
   }
 
-    @override
+
+
+  @override
   Widget build(BuildContext context) {
     return Column(
       children: [
@@ -81,7 +103,8 @@ class _LoginFormState extends State<LoginForm> {
                 borderRadius: BorderRadius.circular(20),
               ),
             ),
-            child: const Text('Ingresar', style: TextStyle(color: Colors.black)),
+            child:
+            const Text('Ingresar', style: TextStyle(color: Colors.black)),
           ),
         ),
         const SizedBox(height: 8),
