@@ -7,19 +7,14 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Optional;
 
 @RestController
-@RequestMapping("/usuarios")
+@RequestMapping("/api/usuarios")
+@CrossOrigin(origins = "*") // Permitir peticiones desde el frontend
 public class UsuarioController {
 
     @Autowired
     private UsuarioService usuarioService;
-
-
-    public UsuarioController(UsuarioService usuarioService) {
-        this.usuarioService = usuarioService;
-    }
 
     // Obtener todos los usuarios
     @GetMapping
@@ -28,14 +23,21 @@ public class UsuarioController {
         return ResponseEntity.ok(usuarios);
     }
 
-    @PostMapping
-    public ResponseEntity<String> guardarUsuario(@RequestBody Usuario usuario) {
+    @PostMapping("/guardar")
+    public ResponseEntity<String> guardarUsuario2(@RequestBody Usuario usuario) {
         try {
             usuarioService.guardarUsuario(usuario);
             return ResponseEntity.ok("Usuario guardado exitosamente.");
         } catch (Exception e) {
             return ResponseEntity.status(500).body("Error al guardar el usuario: " + e.getMessage());
         }
+    }
+    @PostMapping
+    public ResponseEntity<String> guardarUsuario(@RequestBody Usuario usuario) {
+
+        usuarioService.guardarUsuario(usuario);
+        return ResponseEntity.ok("Usuario guardado exitosamente.");
+
     }
 }
 
