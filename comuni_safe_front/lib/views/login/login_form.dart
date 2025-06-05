@@ -2,9 +2,10 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:comuni_safe_front/config/env_config.dart';
+
+import '../home/admin_home_view.dart';
 class LoginForm extends StatefulWidget {
   const LoginForm({super.key});
 
@@ -26,7 +27,7 @@ class _LoginFormState extends State<LoginForm> {
       final userCredential = await FirebaseAuth.instance
           .signInWithEmailAndPassword(email: email, password: password);
 
-      final idToken = await userCredential.user?.getIdToken();
+      final idToken = await userCredential.user?.getIdToken(true);
 
       if (idToken == null) {
         throw Exception("No se pudo obtener el token");
@@ -45,7 +46,18 @@ class _LoginFormState extends State<LoginForm> {
       print('Respuesta: ${response.body}');
 
       if (response.statusCode == 200) {
-        Navigator.pushReplacementNamed(context, 'home');
+        final Map<String, dynamic> data = json.decode(response.body);
+        final String? role = data['role'];
+
+        print('Rol detectado en frontend: $role');
+        print('Navegando a: ${role == 'admin' ? 'admin_home' : 'home'}');
+
+        await FirebaseAuth.instance.currentUser?.getIdToken(true);
+        if (role == 'admin') {
+          Navigator.pushReplacementNamed(context, 'admin_home');
+        } else {
+          Navigator.pushReplacementNamed(context, 'home');
+        }
       } else {
         showDialog(
           context: context,
@@ -87,7 +99,7 @@ class _LoginFormState extends State<LoginForm> {
       );
 
       final userCredential = await FirebaseAuth.instance.signInWithCredential(credential);
-      final idToken = await userCredential.user?.getIdToken();
+      final idToken = await userCredential.user?.getIdToken(true);
 
       if (idToken == null) throw Exception("No se pudo obtener el token de Google");
 
@@ -124,9 +136,6 @@ class _LoginFormState extends State<LoginForm> {
       );
     }
   }
-
-
-
 
   @override
   Widget build(BuildContext context) {
