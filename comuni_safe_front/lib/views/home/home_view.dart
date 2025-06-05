@@ -77,7 +77,7 @@ class HomeView extends StatelessWidget {
                 ),
                 GestureDetector(
                   onTap: () {
-                    //Navigator.pushNamed(context, 'profile');
+                    Navigator.pushNamed(context, 'profile');
                   },
                   child: Row(
                     children: const [

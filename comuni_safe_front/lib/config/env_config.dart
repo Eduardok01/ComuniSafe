@@ -4,6 +4,6 @@ class EnvConfig {
   static String get baseUrl {
     return isProduction
         ? 'https://api.comunisafe.app' // producción
-        : 'http://"Aca va la IP del PC":8080';      // desarrollo (emulador Android)
+        : 'http://Aca va la IP de tu pc:8080';      // IP para teléfono físico
   }
 }

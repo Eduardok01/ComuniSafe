@@ -56,8 +56,6 @@ public class UsuarioService {
         return response;
     }
 
-
-
     public Usuario registrarConToken(String authorizationHeader, RegisterRequest request) throws FirebaseAuthException {
         String idToken = authorizationHeader.replace("Bearer ", "").trim();
         FirebaseToken decodedToken = authService.verifyIdToken(idToken);
@@ -71,5 +69,27 @@ public class UsuarioService {
 
         guardarUsuario(usuario);
         return usuario;
+    }
+
+    // 🔥 NUEVO MÉTODO: Obtener perfil de usuario autenticado
+    public Usuario obtenerUsuarioConToken(String authorizationHeader) throws FirebaseAuthException {
+        String idToken = authorizationHeader.replace("Bearer ", "").trim();
+        FirebaseToken decodedToken = authService.verifyIdToken(idToken);
+        String uid = decodedToken.getUid();
+
+        Firestore db = FirestoreClient.getFirestore();
+        DocumentReference docRef = db.collection(COLLECTION_NAME).document(uid);
+
+        try {
+            DocumentSnapshot snapshot = docRef.get().get();
+            if (snapshot.exists()) {
+                return snapshot.toObject(Usuario.class);
+            } else {
+                return null;
+            }
+        } catch (InterruptedException | ExecutionException e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 }
