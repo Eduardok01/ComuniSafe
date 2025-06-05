@@ -1,5 +1,6 @@
 package com.ufro.service;
 
+import com.google.firebase.auth.FirebaseAuth;
 import com.ufro.dto.RegisterRequest;
 import com.ufro.model.Usuario;
 import com.google.api.core.ApiFuture;
@@ -47,11 +48,21 @@ public class UsuarioService {
         String idToken = authorizationHeader.replace("Bearer ", "").trim();
         FirebaseToken decodedToken = authService.verifyIdToken(idToken);
 
+        String uid = decodedToken.getUid();
+        String email = decodedToken.getEmail();
+
+        // Intenta obtener el rol desde los claims
+        Object roleClaim = decodedToken.getClaims().get("role");
+        String role = roleClaim != null ? roleClaim.toString() : null;
+
         Map<String, Object> response = new HashMap<>();
-        response.put("uid", decodedToken.getUid());
-        response.put("email", decodedToken.getEmail());
+        response.put("uid", uid);
+        response.put("email", email);
+        response.put("role", role);
+
         return response;
     }
+
 
     public Usuario registrarConToken(String authorizationHeader, RegisterRequest request) throws FirebaseAuthException {
         String idToken = authorizationHeader.replace("Bearer ", "").trim();
@@ -67,4 +78,10 @@ public class UsuarioService {
         guardarUsuario(usuario);
         return usuario;
     }
+
+    public void asignarRolAdmin(String uid) throws Exception {
+        FirebaseAuth.getInstance().setCustomUserClaims(uid, Map.of("role", "admin"));
+        System.out.println("Rol admin asignado al usuario con UID: " + uid);
+    }
+
 }
