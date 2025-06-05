@@ -45,13 +45,18 @@ public class UsuarioService {
 
     public Map<String, Object> loginConToken(String authorizationHeader) throws FirebaseAuthException {
         String idToken = authorizationHeader.replace("Bearer ", "").trim();
+        System.out.println("Token recibido: " + idToken);
+
         FirebaseToken decodedToken = authService.verifyIdToken(idToken);
+        System.out.println("Token verificado. UID: " + decodedToken.getUid() + ", Email: " + decodedToken.getEmail());
 
         Map<String, Object> response = new HashMap<>();
         response.put("uid", decodedToken.getUid());
         response.put("email", decodedToken.getEmail());
         return response;
     }
+
+
 
     public Usuario registrarConToken(String authorizationHeader, RegisterRequest request) throws FirebaseAuthException {
         String idToken = authorizationHeader.replace("Bearer ", "").trim();

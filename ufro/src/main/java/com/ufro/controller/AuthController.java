@@ -30,11 +30,14 @@ public class AuthController {
     public ResponseEntity<?> login(@RequestHeader("Authorization") String authorizationHeader) {
         try {
             Map<String, Object> response = usuarioService.loginConToken(authorizationHeader);
+            System.out.println("Respuesta login: " + response);
             return ResponseEntity.ok(response);
         } catch (FirebaseAuthException e) {
+            System.out.println("Error login: " + e.getMessage());
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Token inválido o expirado.");
         }
     }
+
 
     @PostMapping("/register")
     public ResponseEntity<?> register(
