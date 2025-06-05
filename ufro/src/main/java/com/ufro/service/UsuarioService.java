@@ -46,12 +46,14 @@ public class UsuarioService {
 
     public Map<String, Object> loginConToken(String authorizationHeader) throws FirebaseAuthException {
         String idToken = authorizationHeader.replace("Bearer ", "").trim();
+        System.out.println("Token recibido: " + idToken);
+
         FirebaseToken decodedToken = authService.verifyIdToken(idToken);
+        System.out.println("Token verificado. UID: " + decodedToken.getUid() + ", Email: " + decodedToken.getEmail());
 
         String uid = decodedToken.getUid();
         String email = decodedToken.getEmail();
 
-        // Intenta obtener el rol desde los claims
         Object roleClaim = decodedToken.getClaims().get("role");
         String role = roleClaim != null ? roleClaim.toString() : null;
 
@@ -78,10 +80,30 @@ public class UsuarioService {
         guardarUsuario(usuario);
         return usuario;
     }
+    // 🔥 NUEVO MÉTODO: Obtener perfil de usuario autenticado
+    public Usuario obtenerUsuarioConToken(String authorizationHeader) throws FirebaseAuthException {
+        String idToken = authorizationHeader.replace("Bearer ", "").trim();
+        FirebaseToken decodedToken = authService.verifyIdToken(idToken);
+        String uid = decodedToken.getUid();
 
+        Firestore db = FirestoreClient.getFirestore();
+        DocumentReference docRef = db.collection(COLLECTION_NAME).document(uid);
+
+        try {
+            DocumentSnapshot snapshot = docRef.get().get();
+            if (snapshot.exists()) {
+                return snapshot.toObject(Usuario.class);
+            } else {
+                return null;
+            }
+        } catch (InterruptedException | ExecutionException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+  
     public void asignarRolAdmin(String uid) throws Exception {
         FirebaseAuth.getInstance().setCustomUserClaims(uid, Map.of("role", "admin"));
         System.out.println("Rol admin asignado al usuario con UID: " + uid);
     }
-
 }

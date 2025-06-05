@@ -3,6 +3,7 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:comuni_safe_front/config/env_config.dart';
+
 class RegisterView extends StatefulWidget {
   const RegisterView({super.key});
 
@@ -17,6 +18,40 @@ class _RegisterViewState extends State<RegisterView> {
   final TextEditingController confirmPasswordController = TextEditingController();
   final TextEditingController phoneController = TextEditingController();
 
+  final _emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
+
+  Future<void> _showMessageDialog(String title, String message, {Color? titleColor}) {
+    return showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => AlertDialog(
+        title: Center(
+          child: Text(
+            title,
+            style: TextStyle(
+              fontSize: 22,
+              fontWeight: FontWeight.bold,
+              color: titleColor ?? Colors.black87,
+            ),
+          ),
+        ),
+        content: Text(
+          message,
+          textAlign: TextAlign.center,
+          style: const TextStyle(fontSize: 18),
+        ),
+        actions: [
+          Center(
+            child: TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('OK', style: TextStyle(fontSize: 18)),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Future<void> _register() async {
     final String email = emailController.text.trim();
     final String password = passwordController.text;
@@ -25,16 +60,22 @@ class _RegisterViewState extends State<RegisterView> {
     final String name = nameController.text.trim();
 
     if (email.isEmpty || password.isEmpty || confirmPassword.isEmpty || phone.isEmpty || name.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Por favor, completa todos los campos')),
-      );
+      await _showMessageDialog('Campos incompletos', 'Por favor, completa todos los campos', titleColor: Colors.red);
+      return;
+    }
+
+    if (!_emailRegex.hasMatch(email)) {
+      await _showMessageDialog('Correo inválido', 'Por favor, ingresa un correo electrónico válido', titleColor: Colors.red);
+      return;
+    }
+
+    if (password.length < 8) {
+      await _showMessageDialog('Contraseña débil', 'La contraseña debe tener al menos 8 caracteres', titleColor: Colors.red);
       return;
     }
 
     if (password != confirmPassword) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Las contraseñas no coinciden')),
-      );
+      await _showMessageDialog('Contraseñas no coinciden', 'Las contraseñas ingresadas no coinciden', titleColor: Colors.red);
       return;
     }
 
@@ -58,19 +99,13 @@ class _RegisterViewState extends State<RegisterView> {
       );
 
       if (response.statusCode == 200 || response.statusCode == 201) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Registro exitoso')),
-        );
+        await _showMessageDialog('¡Registro exitoso!', 'Tu usuario fue creado correctamente.', titleColor: Colors.green);
         Navigator.pushReplacementNamed(context, 'home');
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error en backend: ${response.statusCode}')),
-        );
+        await _showMessageDialog('Error', 'Error en backend: ${response.statusCode}', titleColor: Colors.red);
       }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error al registrar: $e')),
-      );
+      await _showMessageDialog('Error', 'Error al registrar: $e', titleColor: Colors.red);
     }
   }
 

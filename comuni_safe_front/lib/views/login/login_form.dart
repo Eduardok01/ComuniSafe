@@ -4,8 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:comuni_safe_front/config/env_config.dart';
-
 import '../home/admin_home_view.dart';
+
 class LoginForm extends StatefulWidget {
   const LoginForm({super.key});
 
@@ -59,6 +59,7 @@ class _LoginFormState extends State<LoginForm> {
           Navigator.pushReplacementNamed(context, 'home');
         }
       } else {
+        print('Login fallido con código: ${response.statusCode}');
         showDialog(
           context: context,
           builder: (_) => AlertDialog(
@@ -73,7 +74,8 @@ class _LoginFormState extends State<LoginForm> {
         context: context,
         builder: (_) => const AlertDialog(
           title: Text('Error'),
-          content: Text('No se pudo conectar con el servidor o credenciales inválidas.'),
+          content:
+          Text('No se pudo conectar con el servidor o credenciales inválidas.'),
         ),
       );
     }
@@ -82,8 +84,8 @@ class _LoginFormState extends State<LoginForm> {
   Future<void> _signInWithGoogle() async {
     try {
       final GoogleSignIn googleSignIn = GoogleSignIn(
-        clientId: '654543001926-ou4pvidmql27vlkmhcb41ks3n9lbe3tc.apps.googleusercontent.com'
-      );
+          clientId:
+          '654543001926-ou4pvidmql27vlkmhcb41ks3n9lbe3tc.apps.googleusercontent.com');
       final GoogleSignInAccount? googleUser = await googleSignIn.signIn();
 
       if (googleUser == null) {
@@ -97,7 +99,7 @@ class _LoginFormState extends State<LoginForm> {
         accessToken: googleAuth.accessToken,
         idToken: googleAuth.idToken,
       );
-
+      
       final userCredential = await FirebaseAuth.instance.signInWithCredential(credential);
       final idToken = await userCredential.user?.getIdToken(true);
 
@@ -115,6 +117,7 @@ class _LoginFormState extends State<LoginForm> {
       print('Respuesta backend: ${response.statusCode} - ${response.body}');
 
       if (response.statusCode == 200) {
+        print('Login con Google exitoso, navegando a home');
         Navigator.pushReplacementNamed(context, 'home');
       } else {
         showDialog(
@@ -173,8 +176,7 @@ class _LoginFormState extends State<LoginForm> {
                 borderRadius: BorderRadius.circular(20),
               ),
             ),
-            child:
-            const Text('Ingresar', style: TextStyle(color: Colors.black)),
+            child: const Text('Ingresar', style: TextStyle(color: Colors.black)),
           ),
         ),
         const SizedBox(height: 8),

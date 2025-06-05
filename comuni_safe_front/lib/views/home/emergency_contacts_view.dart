@@ -1,8 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 
-class EmergencyContactsView extends StatelessWidget {
+class EmergencyContactsView extends StatefulWidget {
   const EmergencyContactsView({super.key});
 
+  @override
+  State<EmergencyContactsView> createState() => _EmergencyContactsViewState();
+}
+
+class _EmergencyContactsViewState extends State<EmergencyContactsView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -14,33 +20,40 @@ class EmergencyContactsView extends StatelessWidget {
           icon: const Icon(Icons.arrow_back, color: Colors.black),
           onPressed: () => Navigator.pop(context),
         ),
-        title: const Text('Contactos', style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold,)),
+        title: const Text(
+          'Contactos',
+          style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
+        ),
         centerTitle: true,
       ),
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: ListView(
           children: [
-            const Center(child: Text('Presiona para llamar', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold,))),
+            const Center(
+              child: Text(
+                'Presiona para llamar',
+                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+              ),
+            ),
             const SizedBox(height: 30),
-            _buildContactTile(context, 'assets/samu.png', 'SAMU', '131'),
-            _buildContactTile(context, 'assets/carabineros.png', 'Carabineros de Chile', '133'),
-            _buildContactTile(context, 'assets/pdi.png', 'PDI', '134'),
-            _buildContactTile(context, 'assets/temuco.png', 'Municipalidad Temuco', '1409'),
-            _buildContactTile(context, 'assets/prevencion.png', 'Prevención del Delito', '600 4000 101'),
-            _buildContactTile(context, 'assets/seguridad.png', 'Seguridad 24/7', '652 200 957'),
+            _buildContactTile('assets/samu.png', 'SAMU', '131'),
+            _buildContactTile('assets/carabineros.png', 'Carabineros de Chile', '133'),
+            _buildContactTile('assets/pdi.png', 'PDI', '134'),
+            _buildContactTile('assets/temuco.png', 'Municipalidad Temuco', '1409'),
+            _buildContactTile('assets/prevencion.png', 'Prevención del Delito', '6004000101'),
+            _buildContactTile('assets/seguridad.png', 'Seguridad 24/7', '652200957'),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildContactTile(BuildContext context, String assetPath, String name, String number) {
+  Widget _buildContactTile(String assetPath, String name, String number) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8),
       child: GestureDetector(
-        onTap: () {
-        },
+        onTap: () => _makePhoneCall(number),
         child: Container(
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
@@ -71,5 +84,16 @@ class EmergencyContactsView extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  Future<void> _makePhoneCall(String phoneNumber) async {
+    final Uri uri = Uri(scheme: 'tel', path: phoneNumber);
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('No se pudo realizar la llamada a $phoneNumber')),
+      );
+    }
   }
 }

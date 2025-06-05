@@ -30,8 +30,10 @@ public class AuthController {
     public ResponseEntity<?> login(@RequestHeader("Authorization") String authorizationHeader) {
         try {
             Map<String, Object> response = usuarioService.loginConToken(authorizationHeader);
+            System.out.println("Respuesta login: " + response);
             return ResponseEntity.ok(response);
         } catch (FirebaseAuthException e) {
+            System.out.println("Error login: " + e.getMessage());
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Token inválido o expirado.");
         }
     }
@@ -45,6 +47,20 @@ public class AuthController {
             return ResponseEntity.status(HttpStatus.CREATED).body(usuario);
         } catch (FirebaseAuthException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Token inválido o expirado.");
+        }
+    }
+
+    // 🔥 NUEVO ENDPOINT: Obtener perfil del usuario autenticado
+    @GetMapping("/perfil")
+    public ResponseEntity<?> obtenerPerfil(@RequestHeader("Authorization") String authorizationHeader) {
+        try {
+            Usuario usuario = usuarioService.obtenerUsuarioConToken(authorizationHeader);
+            if (usuario == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Usuario no encontrado.");
+            }
+            return ResponseEntity.ok(usuario);
+        } catch (FirebaseAuthException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Token inválido.");
         }
     }
 }
