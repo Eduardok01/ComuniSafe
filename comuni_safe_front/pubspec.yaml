@@ -70,6 +70,10 @@ flutter:
     - assets/samu.png
     - assets/seguridad.png
     - assets/temuco.png
+    - assets/contactos-logo.png
+    - assets/llamada-carabineros.png
+    - assets/llamada-ambulancia.png
+    - assets/mapa-logo.png
 
   # To add assets to your application, add an assets section, like this:
   # assets:

@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-
+import 'package:comuni_safe_front/config/env_config.dart';
 class LoginForm extends StatefulWidget {
   const LoginForm({super.key});
 
@@ -32,7 +32,7 @@ class _LoginFormState extends State<LoginForm> {
         throw Exception("No se pudo obtener el token");
       }
 
-      final url = Uri.parse('http://localhost:8080/api/auth/login');
+      final url = Uri.parse('${EnvConfig.baseUrl}/api/auth/login');
       final response = await http.post(
         url,
         headers: {
@@ -91,7 +91,7 @@ class _LoginFormState extends State<LoginForm> {
 
       if (idToken == null) throw Exception("No se pudo obtener el token de Google");
 
-      final url = Uri.parse('http://localhost:8080/api/auth/login');
+      final url = Uri.parse('${EnvConfig.baseUrl}/api/auth/login');
       final response = await http.post(
         url,
         headers: {
