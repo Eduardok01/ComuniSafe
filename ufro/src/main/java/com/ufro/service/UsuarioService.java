@@ -30,19 +30,6 @@ public class UsuarioService {
                 .set(usuario);
     }
 
-    public List<Usuario> obtenerTodos() {
-        List<Usuario> usuarios = new ArrayList<>();
-        Firestore db = FirestoreClient.getFirestore();
-        ApiFuture<QuerySnapshot> future = db.collection(COLLECTION_NAME).get();
-        try {
-            for (QueryDocumentSnapshot document : future.get().getDocuments()) {
-                usuarios.add(document.toObject(Usuario.class));
-            }
-        } catch (InterruptedException | ExecutionException e) {
-            e.printStackTrace();
-        }
-        return usuarios;
-    }
 
     public Map<String, Object> loginConToken(String authorizationHeader) throws FirebaseAuthException {
         String idToken = authorizationHeader.replace("Bearer ", "").trim();
@@ -101,9 +88,96 @@ public class UsuarioService {
             return null;
         }
     }
-  
+
+    public Usuario actualizarDatosUsuario(String authorizationHeader, Usuario datosActualizados) throws FirebaseAuthException {
+        String idToken = authorizationHeader.replace("Bearer ", "").trim();
+        FirebaseToken decodedToken = authService.verifyIdToken(idToken);
+        String uid = decodedToken.getUid();
+
+        Firestore db = FirestoreClient.getFirestore();
+        DocumentReference docRef = db.collection(COLLECTION_NAME).document(uid);
+
+        try {
+            DocumentSnapshot snapshot = docRef.get().get();
+            if (snapshot.exists()) {
+                Usuario usuarioActual = snapshot.toObject(Usuario.class);
+
+                // Solo actualizamos campos permitidos
+                if (datosActualizados.getName() != null) {
+                    usuarioActual.setName(datosActualizados.getName());
+                }
+                if (datosActualizados.getPhone() != null) {
+                    usuarioActual.setPhone(datosActualizados.getPhone());
+                }
+
+                docRef.set(usuarioActual);
+                return usuarioActual;
+            } else {
+                return null;
+            }
+        } catch (InterruptedException | ExecutionException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    // métodos para admins
     public void asignarRolAdmin(String uid) throws Exception {
         FirebaseAuth.getInstance().setCustomUserClaims(uid, Map.of("role", "admin"));
         System.out.println("Rol admin asignado al usuario con UID: " + uid);
+    }
+
+    public boolean tieneRol(String authorizationHeader, String rolRequerido) throws FirebaseAuthException {
+        String idToken = authorizationHeader.replace("Bearer ", "").trim();
+        FirebaseToken decodedToken = authService.verifyIdToken(idToken);
+
+        String role = (String) decodedToken.getClaims().get("role");
+        return role != null && role.equalsIgnoreCase(rolRequerido);
+    }
+
+    public List<Usuario> obtenerTodos() {
+        List<Usuario> usuarios = new ArrayList<>();
+        Firestore db = FirestoreClient.getFirestore();
+        ApiFuture<QuerySnapshot> future = db.collection(COLLECTION_NAME).get();
+        try {
+            for (QueryDocumentSnapshot document : future.get().getDocuments()) {
+                usuarios.add(document.toObject(Usuario.class));
+            }
+        } catch (InterruptedException | ExecutionException e) {
+            e.printStackTrace();
+        }
+        return usuarios;
+    }
+
+    public Usuario obtenerUsuarioPorId(String uid) {
+        Firestore db = FirestoreClient.getFirestore();
+        DocumentReference docRef = db.collection(COLLECTION_NAME).document(uid);
+
+        try {
+            DocumentSnapshot snapshot = docRef.get().get();
+            if (snapshot.exists()) {
+                return snapshot.toObject(Usuario.class);
+            } else {
+                return null;
+            }
+        } catch (InterruptedException | ExecutionException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    public Usuario registrarComoAdmin(String authorizationHeader, RegisterRequest request) throws FirebaseAuthException {
+        String idToken = authorizationHeader.replace("Bearer ", "").trim();
+        FirebaseToken decodedToken = authService.verifyIdToken(idToken);
+
+        Usuario usuario = new Usuario();
+        usuario.setUid(decodedToken.getUid());
+        usuario.setCorreo(decodedToken.getEmail());
+        usuario.setName(request.getName());
+        usuario.setPhone(request.getPhone());
+        usuario.setRol("admin");
+
+        guardarUsuario(usuario);
+        return usuario;
     }
 }

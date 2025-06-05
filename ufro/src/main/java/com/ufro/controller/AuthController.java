@@ -63,4 +63,65 @@ public class AuthController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Token inválido.");
         }
     }
+
+    @PatchMapping("/actualizar")
+    public ResponseEntity<?> actualizarUsuario(
+            @RequestHeader("Authorization") String authorizationHeader,
+            @RequestBody Usuario datosActualizados) {
+        try {
+            Usuario actualizado = usuarioService.actualizarDatosUsuario(authorizationHeader, datosActualizados);
+            if (actualizado == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Usuario no encontrado.");
+            }
+            return ResponseEntity.ok(actualizado);
+        } catch (FirebaseAuthException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Token inválido.");
+        }
+    }
+
+    //metodos para admins
+    @PostMapping("/admin/register")
+    public ResponseEntity<?> registerAdmin(
+            @RequestHeader("Authorization") String authorizationHeader,
+            @RequestBody RegisterRequest request) {
+        try {
+            Usuario usuario = usuarioService.registrarComoAdmin(authorizationHeader, request);
+            return ResponseEntity.status(HttpStatus.CREATED).body(usuario);
+        } catch (FirebaseAuthException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Token inválido o expirado.");
+        }
+    }
+
+    @GetMapping("/admin/usuarios")
+    public ResponseEntity<?> obtenerTodosLosUsuarios(@RequestHeader("Authorization") String authorizationHeader) {
+        try {
+            if (!usuarioService.tieneRol(authorizationHeader, "admin")) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Acceso denegado. Solo administradores.");
+            }
+
+            return ResponseEntity.ok(usuarioService.obtenerTodos());
+        } catch (FirebaseAuthException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Token inválido.");
+        }
+    }
+
+    @GetMapping("/admin/usuarios/{uid}")
+    public ResponseEntity<?> obtenerUsuarioPorId(
+            @RequestHeader("Authorization") String authorizationHeader,
+            @PathVariable String uid) {
+        try {
+            if (!usuarioService.tieneRol(authorizationHeader, "admin")) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Acceso denegado. Solo administradores.");
+            }
+
+            Usuario usuario = usuarioService.obtenerUsuarioPorId(uid);
+            if (usuario == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Usuario no encontrado.");
+            }
+
+            return ResponseEntity.ok(usuario);
+        } catch (FirebaseAuthException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Token inválido.");
+        }
+    }
 }
