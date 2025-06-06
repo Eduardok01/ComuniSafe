@@ -25,9 +25,17 @@ public class UsuarioService {
 
     public void guardarUsuario(Usuario usuario) {
         Firestore db = FirestoreClient.getFirestore();
-        db.collection(COLLECTION_NAME)
+        ApiFuture<WriteResult> future = db.collection(COLLECTION_NAME)
                 .document(usuario.getUid())
                 .set(usuario);
+
+        try {
+            WriteResult result = future.get(); // Espera hasta que termine la escritura
+            System.out.println("Usuario guardado en Firestore: " + usuario.getUid() + " at " + result.getUpdateTime());
+        } catch (InterruptedException | ExecutionException e) {
+            System.err.println("Error guardando usuario en Firestore: " + e.getMessage());
+            e.printStackTrace();
+        }
     }
 
     public List<Usuario> obtenerTodos() {
@@ -65,7 +73,6 @@ public class UsuarioService {
         return response;
     }
 
-
     public Usuario registrarConToken(String authorizationHeader, RegisterRequest request) throws FirebaseAuthException {
         String idToken = authorizationHeader.replace("Bearer ", "").trim();
         FirebaseToken decodedToken = authService.verifyIdToken(idToken);
@@ -80,11 +87,13 @@ public class UsuarioService {
         guardarUsuario(usuario);
         return usuario;
     }
-    // 🔥 NUEVO MÉTODO: Obtener perfil de usuario autenticado
+
+    // 🔥 MÉTODO MEJORADO: Obtener perfil y crear si no existe
     public Usuario obtenerUsuarioConToken(String authorizationHeader) throws FirebaseAuthException {
         String idToken = authorizationHeader.replace("Bearer ", "").trim();
         FirebaseToken decodedToken = authService.verifyIdToken(idToken);
         String uid = decodedToken.getUid();
+        String email = decodedToken.getEmail();
 
         Firestore db = FirestoreClient.getFirestore();
         DocumentReference docRef = db.collection(COLLECTION_NAME).document(uid);
@@ -94,14 +103,24 @@ public class UsuarioService {
             if (snapshot.exists()) {
                 return snapshot.toObject(Usuario.class);
             } else {
-                return null;
+                // Crear nuevo usuario con datos básicos
+                Usuario nuevoUsuario = new Usuario();
+                nuevoUsuario.setUid(uid);
+                nuevoUsuario.setCorreo(email);
+                nuevoUsuario.setName("Nombre no asignado");
+                nuevoUsuario.setPhone("No disponible");
+                nuevoUsuario.setRol("user");
+
+                guardarUsuario(nuevoUsuario);
+
+                return nuevoUsuario;
             }
         } catch (InterruptedException | ExecutionException e) {
             e.printStackTrace();
             return null;
         }
     }
-  
+
     public void asignarRolAdmin(String uid) throws Exception {
         FirebaseAuth.getInstance().setCustomUserClaims(uid, Map.of("role", "admin"));
         System.out.println("Rol admin asignado al usuario con UID: " + uid);

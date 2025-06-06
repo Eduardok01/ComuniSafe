@@ -29,37 +29,60 @@ class _ProfileViewState extends State<ProfileView> {
           error = 'Usuario no autenticado';
           isLoading = false;
         });
+        print('No hay usuario autenticado');
         return;
       }
+
+      print('Usuario autenticado UID: ${user.uid}');
+      print('Usuario autenticado email: ${user.email}');
 
       String? idToken = await user.getIdToken();
-      if (idToken == null) {
-        setState(() {
-          error = 'No se pudo obtener el token de autenticación';
-          isLoading = false;
-        });
-        return;
-      }
+      print('Token ID obtenido: $idToken');
 
       final response = await http.get(
-        Uri.parse('https://comunisafe.web.app/api/auth/perfil'),
-        headers: {'Authorization': 'Bearer $idToken'},
+        Uri.parse('http://192.168.0.19:8080/api/auth/perfil'),
+        headers: {
+          'Authorization': 'Bearer $idToken',
+          'Content-Type': 'application/json',
+        },
       );
 
+      print('Respuesta del servidor: ${response.statusCode}');
+
       if (response.statusCode == 200) {
+        final body = json.decode(response.body);
+
+        if (body == null || body.isEmpty) {
+          setState(() {
+            error = 'Perfil no encontrado en el servidor.';
+            isLoading = false;
+          });
+          print('El cuerpo de la respuesta está vacío o es nulo');
+          return;
+        }
+
         setState(() {
-          usuario = json.decode(response.body);
+          usuario = body;
           isLoading = false;
         });
+        print('Perfil cargado correctamente: $usuario');
+      } else if (response.statusCode == 404) {
+        setState(() {
+          error = 'Perfil no encontrado (404).';
+          isLoading = false;
+        });
+        print('Perfil no encontrado en backend');
       } else {
+        print('Error ${response.statusCode}: ${response.body}');
         setState(() {
           error = 'Error al cargar perfil: ${response.statusCode}';
           isLoading = false;
         });
       }
     } catch (e) {
+      print('Excepción capturada: $e');
       setState(() {
-        error = 'Error: $e';
+        error = 'Error inesperado: $e';
         isLoading = false;
       });
     }
@@ -96,8 +119,10 @@ class _ProfileViewState extends State<ProfileView> {
       padding: const EdgeInsets.symmetric(vertical: 10),
       child: Row(
         children: [
-          Text('$titulo: ',
-              style: const TextStyle(fontWeight: FontWeight.bold)),
+          Text(
+            '$titulo: ',
+            style: const TextStyle(fontWeight: FontWeight.bold),
+          ),
           Text(valor ?? 'No disponible'),
         ],
       ),
