@@ -24,7 +24,6 @@ class HomeView extends StatelessWidget {
                 Navigator.pushNamed(context, 'emergency_contacts');
               },
             ),
-
             _buildImageButton(
               'assets/llamada-carabineros.png',
               'Llamada rápida Carabineros',
@@ -32,7 +31,6 @@ class HomeView extends StatelessWidget {
                 // lógica
               },
             ),
-
             _buildImageButton(
               'assets/llamada-ambulancia.png',
               'Llamada rápida Ambulancia',
@@ -40,7 +38,6 @@ class HomeView extends StatelessWidget {
                 // lógica
               },
             ),
-
             _buildImageButton(
               'assets/mapa-logo.png',
               'Ver el mapa',
@@ -48,7 +45,10 @@ class HomeView extends StatelessWidget {
                 // lógica
               },
             ),
-            const Spacer(),
+
+            // Más espacio para separar los botones inferiores
+            const SizedBox(height: 60),
+
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -119,7 +119,7 @@ class HomeView extends StatelessWidget {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(20),
           ),
-          elevation: 0, //
+          elevation: 0,
         ),
         onPressed: onPressed,
         child: Row(
