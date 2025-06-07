@@ -147,4 +147,23 @@ public class UsuarioService {
         }
     }
 
+    public Usuario editarUsuario(String uid, Map<String, Object> datosActualizados) throws ExecutionException, InterruptedException {
+        Firestore db = FirestoreClient.getFirestore();
+        DocumentReference docRef = db.collection("usuarios").document(uid);
+
+        // Verifica que exista
+        DocumentSnapshot snapshot = docRef.get().get();
+        if (!snapshot.exists()) {
+            throw new IllegalArgumentException("Usuario no encontrado");
+        }
+
+        // Aplica los cambios
+        docRef.update(datosActualizados).get();
+
+        // Devuelve el usuario actualizado
+        DocumentSnapshot updatedSnapshot = docRef.get().get();
+        return updatedSnapshot.toObject(Usuario.class);
+    }
+
+
 }

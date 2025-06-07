@@ -1,5 +1,6 @@
 package com.ufro.controller;
 
+import com.ufro.model.Usuario;
 import com.ufro.service.UsuarioService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -49,4 +50,26 @@ public class AdminController {
             return ResponseEntity.status(500).body("Error al eliminar usuario: " + e.getMessage());
         }
     }
+
+    @PatchMapping("/usuarios/{uid}")
+    public ResponseEntity<?> editarUsuario(
+            @RequestHeader("Authorization") String authorizationHeader,
+            @PathVariable String uid,
+            @RequestBody Map<String, Object> datosActualizados) {
+        try {
+            // Verificar token y rol
+            Map<String, Object> claims = usuarioService.loginConToken(authorizationHeader);
+            String role = (String) claims.get("role");
+            if (!"admin".equals(role)) {
+                return ResponseEntity.status(403).body("No autorizado");
+            }
+
+            // Editar usuario
+            Usuario usuarioEditado = usuarioService.editarUsuario(uid, datosActualizados);
+            return ResponseEntity.ok(usuarioEditado);
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("Error al editar usuario: " + e.getMessage());
+        }
+    }
+
 }
