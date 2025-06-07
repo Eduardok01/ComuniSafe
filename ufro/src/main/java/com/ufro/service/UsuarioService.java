@@ -125,4 +125,26 @@ public class UsuarioService {
         FirebaseAuth.getInstance().setCustomUserClaims(uid, Map.of("role", "admin"));
         System.out.println("Rol admin asignado al usuario con UID: " + uid);
     }
+
+    public void borrarUsuario(String uid) throws Exception {
+        // Eliminar en Firestore
+        Firestore db = FirestoreClient.getFirestore();
+        ApiFuture<WriteResult> future = db.collection(COLLECTION_NAME).document(uid).delete();
+
+        try {
+            future.get(); // Esperar a que termine la operación
+            System.out.println("Usuario eliminado de Firestore: " + uid);
+        } catch (InterruptedException | ExecutionException e) {
+            throw new Exception("Error eliminando usuario en Firestore: " + e.getMessage());
+        }
+
+        // Eliminar en Firebase Authentication
+        try {
+            FirebaseAuth.getInstance().deleteUser(uid);
+            System.out.println("Usuario eliminado de Firebase Auth: " + uid);
+        } catch (FirebaseAuthException e) {
+            throw new Exception("Error eliminando usuario en Firebase Auth: " + e.getMessage());
+        }
+    }
+
 }
