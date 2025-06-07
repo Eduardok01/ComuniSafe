@@ -25,10 +25,12 @@ class _ProfileViewState extends State<ProfileView> {
     try {
       User? user = FirebaseAuth.instance.currentUser;
       if (user == null) {
-        setState(() {
-          error = 'Usuario no autenticado';
-          isLoading = false;
-        });
+        if (mounted) {
+          setState(() {
+            error = 'Usuario no autenticado';
+            isLoading = false;
+          });
+        }
         print('No hay usuario autenticado');
         return;
       }
@@ -40,7 +42,7 @@ class _ProfileViewState extends State<ProfileView> {
       print('Token ID obtenido: $idToken');
 
       final response = await http.get(
-        Uri.parse('http://192.168.0.19:8080/api/auth/perfil'),
+        Uri.parse('Aca va la IP de tu PC:8080/api/auth/perfil'), // Cambia la IP a la de tu PC
         headers: {
           'Authorization': 'Bearer $idToken',
           'Content-Type': 'application/json',
@@ -53,38 +55,48 @@ class _ProfileViewState extends State<ProfileView> {
         final body = json.decode(response.body);
 
         if (body == null || body.isEmpty) {
-          setState(() {
-            error = 'Perfil no encontrado en el servidor.';
-            isLoading = false;
-          });
+          if (mounted) {
+            setState(() {
+              error = 'Perfil no encontrado en el servidor.';
+              isLoading = false;
+            });
+          }
           print('El cuerpo de la respuesta está vacío o es nulo');
           return;
         }
 
-        setState(() {
-          usuario = body;
-          isLoading = false;
-        });
+        if (mounted) {
+          setState(() {
+            usuario = body;
+            isLoading = false;
+          });
+        }
         print('Perfil cargado correctamente: $usuario');
       } else if (response.statusCode == 404) {
-        setState(() {
-          error = 'Perfil no encontrado (404).';
-          isLoading = false;
-        });
+        if (mounted) {
+          setState(() {
+            error = 'Perfil no encontrado (404).';
+            isLoading = false;
+          });
+        }
         print('Perfil no encontrado en backend');
       } else {
         print('Error ${response.statusCode}: ${response.body}');
-        setState(() {
-          error = 'Error al cargar perfil: ${response.statusCode}';
-          isLoading = false;
-        });
+        if (mounted) {
+          setState(() {
+            error = 'Error al cargar perfil: ${response.statusCode}';
+            isLoading = false;
+          });
+        }
       }
     } catch (e) {
       print('Excepción capturada: $e');
-      setState(() {
-        error = 'Error inesperado: $e';
-        isLoading = false;
-      });
+      if (mounted) {
+        setState(() {
+          error = 'Error inesperado: $e';
+          isLoading = false;
+        });
+      }
     }
   }
 

@@ -4,7 +4,7 @@ class EnvConfig {
   static String get baseUrl {
     return isProduction
         ? 'https://api.comunisafe.app' // producción
-        : 'http://http://10.0.2.2:8080'; // IP Para emular el teléfono
-        //: 'http://Aca va la IP del PC:8080';      // IP para teléfono físico
+        //: 'http://http://10.0.2.2:8080'; // IP Para emular el teléfono
+        : 'http://Aca va la IP de tu PC:8080';      // IP para teléfono físico
   }
 }
