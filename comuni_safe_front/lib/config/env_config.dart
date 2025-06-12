@@ -5,6 +5,6 @@ class EnvConfig {
     return isProduction
         ? 'https://api.comunisafe.app' // producción
         //: 'http://http://10.0.2.2:8080'; // IP Para emular el teléfono
-        : 'http://Aca va la IP de tu PC:8080';      // IP para teléfono físico
+        : 'http://192.168.0.19:8080';      // IP para teléfono físico
   }
 }
