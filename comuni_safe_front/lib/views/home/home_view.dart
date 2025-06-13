@@ -1,7 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class HomeView extends StatelessWidget {
   const HomeView({super.key});
+
+  Future<void> _makePhoneCall(String phoneNumber) async {
+    final Uri launchUri = Uri(scheme: 'tel', path: phoneNumber);
+    if (await canLaunchUrl(launchUri)) {
+      await launchUrl(launchUri);
+    } else {
+      // Aquí puedes mostrar un mensaje o loguear que no se pudo iniciar la llamada
+      debugPrint('No se pudo iniciar la llamada a $phoneNumber');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -28,25 +39,24 @@ class HomeView extends StatelessWidget {
               'assets/llamada-carabineros.png',
               'Llamada rápida Carabineros',
                   () {
-                // lógica
+                _makePhoneCall('133');
               },
             ),
             _buildImageButton(
               'assets/llamada-ambulancia.png',
               'Llamada rápida Ambulancia',
                   () {
-                // lógica
+                _makePhoneCall('131');
               },
             ),
             _buildImageButton(
               'assets/mapa-logo.png',
               'Ver el mapa',
                   () {
-                // lógica
+                // lógica para el mapa
               },
             ),
 
-            // Más espacio para separar los botones inferiores
             const SizedBox(height: 60),
 
             Row(
