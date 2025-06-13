@@ -149,7 +149,7 @@ public class UsuarioService {
 
     public Usuario editarUsuario(String uid, Map<String, Object> datosActualizados) throws ExecutionException, InterruptedException {
         Firestore db = FirestoreClient.getFirestore();
-        DocumentReference docRef = db.collection("usuarios").document(uid);
+        DocumentReference docRef = db.collection(COLLECTION_NAME).document(uid);
 
         // Verifica que exista
         DocumentSnapshot snapshot = docRef.get().get();
@@ -157,7 +157,19 @@ public class UsuarioService {
             throw new IllegalArgumentException("Usuario no encontrado");
         }
 
-        // Aplica los cambios
+        // Si se está actualizando el rol, actualizar también los custom claims en Firebase Auth
+        if (datosActualizados.containsKey("rol")) {
+            String nuevoRol = (String) datosActualizados.get("rol");
+            try {
+                FirebaseAuth.getInstance().setCustomUserClaims(uid, Map.of("role", nuevoRol));
+                System.out.println("Custom claim 'role' actualizado para UID " + uid + " con valor: " + nuevoRol);
+            } catch (FirebaseAuthException e) {
+                System.err.println("Error actualizando custom claims en Firebase Auth: " + e.getMessage());
+                // Podrías lanzar excepción o manejar el error según tu lógica
+            }
+        }
+
+        // Aplica los cambios en Firestore
         docRef.update(datosActualizados).get();
 
         // Devuelve el usuario actualizado

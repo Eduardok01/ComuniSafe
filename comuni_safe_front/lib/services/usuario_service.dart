@@ -1,44 +1,55 @@
-import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'dart:convert';
+
 import '../models/usuario.dart';
 
 class UsuarioService {
-  final String baseUrl = 'http://192.168.0.19:8080/api/admin';
+  final String baseUrl = 'http://192.168.0.19:8080/api/admin'; // Cambia por tu URL real
 
   Future<List<Usuario>> obtenerUsuarios(String token) async {
-    final response = await http.get(
-      Uri.parse('$baseUrl/usuarios'),
-      headers: {
-        'Authorization': 'Bearer $token',
-        'Content-Type': 'application/json',
-      },
-    );
+    final url = Uri.parse('$baseUrl/usuarios');
+    final response = await http.get(url, headers: {
+      'Authorization': 'Bearer $token',
+    });
 
     if (response.statusCode == 200) {
-      final List<dynamic> jsonList = jsonDecode(response.body);
+      List<dynamic> jsonList = json.decode(response.body);
       return jsonList.map((json) => Usuario.fromJson(json)).toList();
     } else {
-      throw Exception('Error al obtener usuarios: ${response.statusCode}');
+      throw Exception('Error al obtener usuarios');
     }
   }
 
-  Future<bool> editarUsuario(String uid, Map<String, dynamic> datosActualizados, String token) async {
+  Future<bool> eliminarUsuario(String uid, String token) async {
+    final url = Uri.parse('$baseUrl/usuarios/$uid');
+
+    final response = await http.delete(
+      url,
+      headers: {
+        'Authorization': 'Bearer $token',
+      },
+    );
+
+    return response.statusCode == 200;
+  }
+
+  Future<bool> editarUsuario(String uid, Map<String, dynamic> datos, String token) async {
     final url = Uri.parse('$baseUrl/usuarios/$uid');
 
     final response = await http.patch(
       url,
       headers: {
-        'Authorization': 'Bearer $token',
         'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token',
       },
-      body: jsonEncode(datosActualizados),
+      body: json.encode(datos),
     );
 
-    if (response.statusCode == 200) {
-      return true;
-    } else {
-      print('Error al editar usuario: ${response.statusCode} - ${response.body}');
-      return false;
-    }
+    return response.statusCode == 200;
+  }
+
+  Future<Usuario> crearUsuario(Map<String, dynamic> datos) async {
+    // Implementar creación si quieres
+    throw UnimplementedError();
   }
 }
