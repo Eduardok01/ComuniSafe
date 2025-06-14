@@ -43,7 +43,7 @@ class UsuarioService {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $token',
       },
-      body: json.encode(datos),
+      body: json.encode(datos), // Aquí puedes enviar también {"password": "nuevaClave"}
     );
 
     return response.statusCode == 200;

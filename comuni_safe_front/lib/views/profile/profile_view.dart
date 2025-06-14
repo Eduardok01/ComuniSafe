@@ -63,7 +63,6 @@ class _ProfileViewState extends State<ProfileView> {
             usuario = body;
             isLoading = false;
 
-            // Setear valores a los controllers para edición
             nameController.text = usuario?['name'] ?? '';
             correoController.text = usuario?['correo'] ?? '';
             phoneController.text = usuario?['phone'] ?? '';
@@ -121,7 +120,6 @@ class _ProfileViewState extends State<ProfileView> {
       );
 
       if (response.statusCode == 200) {
-        // Actualizar localmente
         setState(() {
           usuario!['name'] = nameController.text.trim();
           usuario!['correo'] = correoController.text.trim();
@@ -210,23 +208,34 @@ class _ProfileViewState extends State<ProfileView> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Mi Perfil'),
-        backgroundColor: const Color(0xFFD2C0A5),
+        backgroundColor: const Color(0xFFE2734B),
         actions: [
           if (!isLoading && error.isEmpty)
-            IconButton(
-              icon: Icon(isEditing ? Icons.save : Icons.edit),
-              onPressed: () {
-                if (isEditing) {
-                  guardarCambios();
-                } else {
-                  setState(() {
-                    isEditing = true;
-                  });
-                }
-              },
+            Padding(
+              padding: const EdgeInsets.only(right: 8),
+              child: TextButton.icon(
+                onPressed: () {
+                  if (isEditing) {
+                    guardarCambios();
+                  } else {
+                    setState(() {
+                      isEditing = true;
+                    });
+                  }
+                },
+                icon: Icon(
+                  isEditing ? Icons.save : Icons.edit,
+                  color: Colors.black,
+                ),
+                label: Text(
+                  isEditing ? 'Guardar' : 'Editar datos',
+                  style: const TextStyle(color: Colors.black),
+                ),
+              ),
             ),
         ],
       ),
+      backgroundColor: const Color(0xFFFFF5EE), // ← FONDO AÑADIDO AQUÍ
       body: isLoading
           ? const Center(child: CircularProgressIndicator())
           : error.isNotEmpty
@@ -238,20 +247,20 @@ class _ProfileViewState extends State<ProfileView> {
           child: ListView(
             children: [
               _buildEditableCampo('Nombre', nameController, enabled: isEditing),
-              _buildEditableCampo('Correo', correoController,
-                  enabled: isEditing,
-                  keyboardType: TextInputType.emailAddress,
-                  validator: (val) {
-                    if (val == null ||
-                        !RegExp(r'^[^@]+@[^@]+\.[^@]+').hasMatch(val)) {
-                      return 'Ingrese un correo válido';
-                    }
-                    return null;
-                  }),
+              _buildEditableCampo(
+                'Correo',
+                correoController,
+                enabled: isEditing,
+                keyboardType: TextInputType.emailAddress,
+                validator: (val) {
+                  if (val == null || !RegExp(r'^[^@]+@[^@]+\.[^@]+').hasMatch(val)) {
+                    return 'Ingrese un correo válido';
+                  }
+                  return null;
+                },
+              ),
               _buildEditableCampo('Teléfono', phoneController,
-                  enabled: isEditing,
-                  keyboardType: TextInputType.phone),
-              //_buildDato('Rol', usuario?['rol']),
+                  enabled: isEditing, keyboardType: TextInputType.phone),
               const SizedBox(height: 20),
               ElevatedButton.icon(
                 onPressed: mostrarDialogoCambioClave,
@@ -281,9 +290,7 @@ class _ProfileViewState extends State<ProfileView> {
         validator: validator,
         decoration: InputDecoration(
           labelText: titulo,
-          border: enabled
-              ? const OutlineInputBorder()
-              : InputBorder.none,
+          border: enabled ? const OutlineInputBorder() : InputBorder.none,
           filled: !enabled,
           fillColor: enabled ? null : Colors.grey.shade200,
         ),
@@ -296,8 +303,7 @@ class _ProfileViewState extends State<ProfileView> {
       padding: const EdgeInsets.symmetric(vertical: 10),
       child: Row(
         children: [
-          Text('$titulo: ',
-              style: const TextStyle(fontWeight: FontWeight.bold)),
+          Text('$titulo: ', style: const TextStyle(fontWeight: FontWeight.bold)),
           Text(valor ?? ''),
         ],
       ),

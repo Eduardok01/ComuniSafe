@@ -45,20 +45,103 @@ class _AdminUserListViewState extends State<AdminUserListView> {
     }
   }
 
+  Future<void> _mostrarMensajeDialog(String titulo, String mensaje,
+      {Color titleColor = Colors.black}) async {
+    return showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        backgroundColor: Colors.white,
+        title: Text(
+          titulo,
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: 20,
+            color: titleColor,
+          ),
+        ),
+        content: Text(
+          mensaje,
+          textAlign: TextAlign.center,
+          style: const TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+            color: Colors.black,
+            fontFamily: 'Roboto',
+          ),
+        ),
+        actions: [
+          Center(
+            child: TextButton(
+              style: TextButton.styleFrom(
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12)),
+              ),
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text(
+                'Ok',
+                style:
+                TextStyle(color: Colors.blue, fontWeight: FontWeight.bold),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Future<void> _eliminarUsuario(String uid, String nombre) async {
     final confirm = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Confirmar eliminación'),
-        content: Text('¿Eliminar usuario $nombre?'),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        backgroundColor: Colors.white,
+        title: Center(
+          child: Text(
+            'Estás Eliminando usuario!!',
+            style: const TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 20,
+              color: Colors.red,
+            ),
+            textAlign: TextAlign.center,
+          ),
+        ),
+        content: Text(
+          '¿Estás seguro de eliminar a $nombre?',
+          textAlign: TextAlign.center,
+          style: const TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+            color: Colors.black,
+            fontFamily: 'Roboto',
+          ),
+        ),
+        actionsAlignment: MainAxisAlignment.center,
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancelar'),
+            style: TextButton.styleFrom(foregroundColor: Colors.grey),
+            child: const Text(
+              'Cancelar',
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                color: Colors.grey,
+              ),
+            ),
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
-            child: const Text('Eliminar'),
+            style: TextButton.styleFrom(foregroundColor: Colors.red),
+            child: const Text(
+              'Eliminar',
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                color: Colors.red,
+              ),
+            ),
           ),
         ],
       ),
@@ -67,19 +150,24 @@ class _AdminUserListViewState extends State<AdminUserListView> {
     if (confirm == true) {
       bool success = await UsuarioService().eliminarUsuario(uid, widget.token);
       if (success) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Usuario $nombre eliminado')),
+        await _mostrarMensajeDialog(
+          '¡Usuario eliminado!',
+          'El usuario $nombre fue eliminado correctamente.',
+          titleColor: Colors.green,
         );
         _refreshUsuarios();
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Error eliminando usuario')),
+        await _mostrarMensajeDialog(
+          'Error',
+          'Error eliminando usuario.',
+          titleColor: Colors.red,
         );
       }
     }
   }
 
-  Widget _buildCampoConBotonFuera(String titulo, String valor, {Widget? boton}) {
+  Widget _buildCampoConBotonFuera(String titulo, String valor,
+      {Widget? boton}) {
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 4),
       child: Row(
@@ -151,7 +239,8 @@ class _AdminUserListViewState extends State<AdminUserListView> {
                   children: [
                     const Text(
                       'Selecciona un color de fondo:',
-                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+                      style:
+                      TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
                     ),
                     const SizedBox(height: 14),
                     Wrap(
@@ -221,13 +310,16 @@ class _AdminUserListViewState extends State<AdminUserListView> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Usuarios registrados'),
+        title: const Text('Lista de Usuarios'),
         backgroundColor: const Color(0xFFE2734B),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.color_lens),
-            tooltip: 'Cambiar color de fondo',
-            onPressed: _mostrarSelectorColor,
+          TextButton.icon(
+            onPressed: _abrirCrearUsuario,
+            icon: const Icon(Icons.person_add, color: Colors.black),
+            label: const Text(
+              'Nuevo Usuario',
+              style: TextStyle(color: Colors.black),
+            ),
           ),
         ],
       ),
@@ -249,6 +341,7 @@ class _AdminUserListViewState extends State<AdminUserListView> {
                 onRefresh: _refreshUsuarios,
                 child: ListView(
                   physics: const AlwaysScrollableScrollPhysics(),
+                  padding: const EdgeInsets.only(bottom: 80),
                   children: const [
                     SizedBox(height: 100),
                     Center(child: Text('No hay usuarios registrados.')),
@@ -263,7 +356,8 @@ class _AdminUserListViewState extends State<AdminUserListView> {
             child: RefreshIndicator(
               onRefresh: _refreshUsuarios,
               child: ListView.builder(
-                padding: const EdgeInsets.all(12),
+                padding: const EdgeInsets.only(
+                    top: 12, left: 12, right: 12, bottom: 80),
                 itemCount: usuarios.length,
                 itemBuilder: (context, index) {
                   final u = usuarios[index];
@@ -290,7 +384,7 @@ class _AdminUserListViewState extends State<AdminUserListView> {
                             'Nombre',
                             u.name,
                             boton: IconButton(
-                              icon: const Icon(Icons.edit, color: Colors.blueAccent),
+                              icon: const Icon(Icons.edit, color: Colors.black),
                               tooltip: 'Editar usuario',
                               onPressed: () => _editarUsuario(usuarioMap),
                             ),
@@ -300,7 +394,7 @@ class _AdminUserListViewState extends State<AdminUserListView> {
                             'Teléfono',
                             u.phone,
                             boton: IconButton(
-                              icon: const Icon(Icons.delete, color: Colors.redAccent),
+                              icon: const Icon(Icons.delete, color: Colors.red),
                               tooltip: 'Eliminar usuario',
                               onPressed: () => _eliminarUsuario(u.uid, u.name),
                             ),
@@ -316,11 +410,11 @@ class _AdminUserListViewState extends State<AdminUserListView> {
           );
         },
       ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: _abrirCrearUsuario,
-        label: const Text('Nuevo Usuario'),
-        icon: const Icon(Icons.person_add),
+      floatingActionButton: FloatingActionButton(
         backgroundColor: const Color(0xFFE2734B),
+        tooltip: 'Cambiar color de fondo',
+        child: const Icon(Icons.color_lens),
+        onPressed: _mostrarSelectorColor,
       ),
     );
   }
