@@ -14,11 +14,9 @@ class AdminHomeView extends StatelessWidget {
           padding: const EdgeInsets.all(20),
           child: Column(
             children: [
-              // Aquí sólo el logo de la izquierda, sin columna de texto al lado
               Center(
-                child: Image.asset('assets/logo.png', height: 180), // aumenté tamaño a 180
+                child: Image.asset('assets/logo.png', height: 180),
               ),
-
 
               const SizedBox(height: 0),
 
@@ -66,7 +64,7 @@ class AdminHomeView extends StatelessWidget {
                 ),
               ),
 
-              const SizedBox(height: 2),
+              const SizedBox(height: 8),
 
               ElevatedButton.icon(
                 onPressed: () {
@@ -76,7 +74,7 @@ class AdminHomeView extends StatelessWidget {
                 label: const Text('Ver el mapa'),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFFD26033),
-                  foregroundColor: Colors.white,
+                  foregroundColor: Colors.black,
                   minimumSize: const Size(double.infinity, 48),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(16),
@@ -84,7 +82,7 @@ class AdminHomeView extends StatelessWidget {
                 ),
               ),
 
-              const SizedBox(height: 2),
+              const SizedBox(height: 8),
 
               ElevatedButton.icon(
                 onPressed: () async {
@@ -113,7 +111,7 @@ class AdminHomeView extends StatelessWidget {
                 label: const Text('Ver lista de usuarios'),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFFD26033),
-                  foregroundColor: Colors.white,
+                  foregroundColor: Colors.black,
                   minimumSize: const Size(double.infinity, 48),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(16),
@@ -123,30 +121,50 @@ class AdminHomeView extends StatelessWidget {
 
               const Spacer(),
 
-              // Footer
               Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  TextButton.icon(
-                    onPressed: () {
+                  _buildFooterButton(
+                    icon: Icons.logout,
+                    label: 'Cerrar Sesión',
+                    onTap: () {
                       FirebaseAuth.instance.signOut();
                       Navigator.pushReplacementNamed(context, 'login');
                     },
-                    icon: const Icon(Icons.logout),
-                    label: const Text('Cerrar\nSesión'),
                   ),
-                  TextButton.icon(
-                    onPressed: () {
+                  _buildFooterButton(
+                    icon: Icons.person,
+                    label: 'Ver perfil',
+                    onTap: () {
                       Navigator.pushNamed(context, 'profile');
                     },
-                    icon: const Icon(Icons.person),
-                    label: const Text('Ver\nperfil'),
                   ),
                 ],
-              )
+              ),
+              const SizedBox(height: 16),
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildFooterButton({
+    required IconData icon,
+    required String label,
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Row(
+        children: [
+          Icon(icon, size: 28, color: Colors.black),
+          const SizedBox(width: 6),
+          Text(
+            label,
+            style: const TextStyle(fontSize: 16, color: Colors.black),
+          ),
+        ],
       ),
     );
   }
