@@ -46,7 +46,7 @@ class _MapViewState extends State<MapView> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Mapa en tiempo real'),
-        backgroundColor: Colors.orange,
+        backgroundColor: const Color(0xFFE2734B),
       ),
       body: userLocation == null
           ? const Center(child: CircularProgressIndicator())

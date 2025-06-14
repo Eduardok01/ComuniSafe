@@ -1,15 +1,18 @@
 package com.ufro.service;
 
-import com.google.api.core.ApiFuture;
-import com.google.cloud.firestore.*;
-import com.google.firebase.cloud.FirestoreClient;
 import com.ufro.model.Reporte;
-import com.ufro.model.Usuario;
+import com.google.api.core.ApiFuture;
+import com.google.cloud.Timestamp;
+import com.google.cloud.firestore.DocumentReference;
+import com.google.cloud.firestore.Firestore;
+import com.google.cloud.firestore.WriteResult;
+import com.google.firebase.cloud.FirestoreClient;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
+import java.time.ZoneOffset;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.ExecutionException;
-import java.util.stream.Collectors;
 
 @Service
 public class ReporteService {
@@ -18,46 +21,33 @@ public class ReporteService {
 
     public String crearReporte(Reporte reporte) throws ExecutionException, InterruptedException {
         Firestore db = FirestoreClient.getFirestore();
-        DocumentReference docRef = db.collection(COLLECTION_NAME).document();
-        reporte.setPendiente(true);
-        ApiFuture<WriteResult> future = docRef.set(reporte);
-
-        return "Reporte creado en: " + future.get().getUpdateTime();
-    }
-
-    public String actualizarEstado(String id) throws ExecutionException, InterruptedException {
-        Firestore db = FirestoreClient.getFirestore();
+        String id = db.collection(COLLECTION_NAME).document().getId(); // Genera ID
         DocumentReference docRef = db.collection(COLLECTION_NAME).document(id);
-        ApiFuture<WriteResult> future = docRef.update("pendiente", false);
-        return "Estado actualizado en: " + future.get().getUpdateTime();
+        reporte.setId(id);
+        reporte.setPendiente(true);
+
+        // Construir un Map para enviar datos, incluyendo la conversión correcta de fechaHora
+        Map<String, Object> datos = new HashMap<>();
+        datos.put("id", reporte.getId());
+        datos.put("tipo", reporte.getTipo());
+        datos.put("descripcion", reporte.getDescripcion());
+        datos.put("pendiente", reporte.getPendiente());
+        datos.put("latitud", reporte.getLatitud());
+        datos.put("longitud", reporte.getLongitud());
+        datos.put("direccion", reporte.getDireccion());
+
+        // Convertir LocalDateTime a Timestamp Firestore usando toEpochSecond y getNano
+        datos.put("fechaHora", Timestamp.ofTimeSecondsAndNanos(
+                reporte.getFechaHora().toEpochSecond(ZoneOffset.UTC),
+                reporte.getFechaHora().getNano()
+        ));
+
+        datos.put("usuarioId", reporte.getUsuarioId());
+
+        ApiFuture<WriteResult> future = docRef.set(datos);
+        future.get(); // Espera a que se complete la escritura
+        return id;
     }
 
-    public Reporte obtenerReporte(String id) throws ExecutionException, InterruptedException {
-        Firestore db = FirestoreClient.getFirestore();
-        DocumentSnapshot snapshot = db.collection(COLLECTION_NAME).document(id).get().get();
-        return snapshot.exists() ? snapshot.toObject(Reporte.class) : null;
-    }
-
-    public List<Reporte> obtenerTodosLosReportes() throws ExecutionException, InterruptedException {
-        Firestore db = FirestoreClient.getFirestore();
-        ApiFuture<QuerySnapshot> future = db.collection(COLLECTION_NAME).get();
-        return future.get().getDocuments().stream()
-                .map(doc -> doc.toObject(Reporte.class))
-                .collect(Collectors.toList());
-    }
-
-//    public void guardarReporte(Usuario usuario) {
-//        Firestore db = FirestoreClient.getFirestore();
-//        ApiFuture<WriteResult> future = db.collection(COLLECTION_NAME)
-//                .document(usuario.getUid())
-//                .set(usuario);
-//
-//        try {
-//            WriteResult result = future.get(); // Espera hasta que termine la escritura
-//            System.out.println("Usuario guardado en Firestore: " + usuario.getUid() + " at " + result.getUpdateTime());
-//        } catch (InterruptedException | ExecutionException e) {
-//            System.err.println("Error guardando usuario en Firestore: " + e.getMessage());
-//            e.printStackTrace();
-//        }
-//    }
+    // Aquí podrías agregar métodos para obtener, actualizar, borrar reportes...
 }
