@@ -4,9 +4,10 @@ import com.google.api.core.ApiFuture;
 import com.google.cloud.firestore.*;
 import com.google.firebase.cloud.FirestoreClient;
 import com.ufro.model.Reporte;
-import com.ufro.model.Usuario;
 import org.springframework.stereotype.Service;
 
+import java.time.Instant;
+import java.util.Date;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
@@ -20,9 +21,10 @@ public class ReporteService {
         Firestore db = FirestoreClient.getFirestore();
         DocumentReference docRef = db.collection(COLLECTION_NAME).document();
         reporte.setPendiente(true);
+        reporte.setFechaHora(Date.from(Instant.now()));
         ApiFuture<WriteResult> future = docRef.set(reporte);
 
-        return "Reporte creado en: " + future.get().getUpdateTime();
+        return "Reporte creado en: " + reporte.getTipo();
     }
 
     public String actualizarEstado(String id) throws ExecutionException, InterruptedException {
