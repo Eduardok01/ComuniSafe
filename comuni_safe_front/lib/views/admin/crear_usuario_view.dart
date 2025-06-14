@@ -17,6 +17,7 @@ class _CrearUsuarioViewState extends State<CrearUsuarioView> {
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _nombreController = TextEditingController();
   final TextEditingController _correoController = TextEditingController();
+  //xD
   final TextEditingController _telefonoController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   String _rol = 'usuario'; // valor por defecto
@@ -30,7 +31,7 @@ class _CrearUsuarioViewState extends State<CrearUsuarioView> {
       _cargando = true;
     });
 
-    final url = Uri.parse('http://${EnvConfig.baseUrl}:8080/api/admin/usuarios'); // Cambia si usas https o IP real
+    final url = Uri.parse('${EnvConfig.baseUrl}/api/admin/usuarios'); // Cambia si usas https o IP real
     final headers = {
       'Content-Type': 'application/json',
       'Authorization': 'Bearer ${widget.token}',

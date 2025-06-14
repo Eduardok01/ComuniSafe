@@ -48,7 +48,7 @@ class _ProfileViewState extends State<ProfileView> {
       String? idToken = await user.getIdToken();
 
       final response = await http.get(
-        Uri.parse('http://${EnvConfig.baseUrl}:8080/api/auth/perfil'),
+        Uri.parse('${EnvConfig.baseUrl}/api/auth/perfil'),
         headers: {
           'Authorization': 'Bearer $idToken',
           'Content-Type': 'application/json',
@@ -112,7 +112,7 @@ class _ProfileViewState extends State<ProfileView> {
       };
 
       final response = await http.put(
-        Uri.parse('http://${EnvConfig.baseUrl}:8080/api/auth/perfil'),
+        Uri.parse('${EnvConfig.baseUrl}/api/auth/perfil'),
         headers: {
           'Authorization': 'Bearer $idToken',
           'Content-Type': 'application/json',
