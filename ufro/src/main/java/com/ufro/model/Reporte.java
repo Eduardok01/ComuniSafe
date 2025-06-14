@@ -1,10 +1,7 @@
 package com.ufro.model;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
-import java.sql.Timestamp;
+import lombok.*;
+import com.google.cloud.Timestamp;
 
 @Data
 @NoArgsConstructor
@@ -13,9 +10,10 @@ public class Reporte {
 
     private String tipo;
     private String descripcion;
-    private String estado;
+    private Boolean pendiente;
     private Double latitud;
     private Double longitud;
     private String direccion;
     private Timestamp fechaHora;
+    private String usuarioId;
 }

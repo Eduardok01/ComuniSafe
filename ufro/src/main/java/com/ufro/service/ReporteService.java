@@ -4,6 +4,7 @@ import com.google.api.core.ApiFuture;
 import com.google.cloud.firestore.*;
 import com.google.firebase.cloud.FirestoreClient;
 import com.ufro.model.Reporte;
+import com.ufro.model.Usuario;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -18,14 +19,16 @@ public class ReporteService {
     public String crearReporte(Reporte reporte) throws ExecutionException, InterruptedException {
         Firestore db = FirestoreClient.getFirestore();
         DocumentReference docRef = db.collection(COLLECTION_NAME).document();
+        reporte.setPendiente(true);
         ApiFuture<WriteResult> future = docRef.set(reporte);
+
         return "Reporte creado en: " + future.get().getUpdateTime();
     }
 
-    public String actualizarEstado(String id, String nuevoEstado) throws ExecutionException, InterruptedException {
+    public String actualizarEstado(String id) throws ExecutionException, InterruptedException {
         Firestore db = FirestoreClient.getFirestore();
         DocumentReference docRef = db.collection(COLLECTION_NAME).document(id);
-        ApiFuture<WriteResult> future = docRef.update("estado", nuevoEstado);
+        ApiFuture<WriteResult> future = docRef.update("pendiente", false);
         return "Estado actualizado en: " + future.get().getUpdateTime();
     }
 
@@ -42,4 +45,19 @@ public class ReporteService {
                 .map(doc -> doc.toObject(Reporte.class))
                 .collect(Collectors.toList());
     }
+
+//    public void guardarReporte(Usuario usuario) {
+//        Firestore db = FirestoreClient.getFirestore();
+//        ApiFuture<WriteResult> future = db.collection(COLLECTION_NAME)
+//                .document(usuario.getUid())
+//                .set(usuario);
+//
+//        try {
+//            WriteResult result = future.get(); // Espera hasta que termine la escritura
+//            System.out.println("Usuario guardado en Firestore: " + usuario.getUid() + " at " + result.getUpdateTime());
+//        } catch (InterruptedException | ExecutionException e) {
+//            System.err.println("Error guardando usuario en Firestore: " + e.getMessage());
+//            e.printStackTrace();
+//        }
+//    }
 }

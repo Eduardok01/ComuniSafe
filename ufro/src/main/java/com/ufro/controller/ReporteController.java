@@ -23,8 +23,8 @@ public class ReporteController {
     }
 
     @PutMapping("/{id}/estado")
-    public String actualizarEstado(@PathVariable String id, @RequestBody String nuevoEstado) throws ExecutionException, InterruptedException {
-        return reporteService.actualizarEstado(id, nuevoEstado);
+    public String actualizarEstado(@PathVariable String id) throws ExecutionException, InterruptedException {
+        return reporteService.actualizarEstado(id);
     }
 
     @GetMapping("/{id}")
