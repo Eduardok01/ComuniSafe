@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
+import '../../config/env_config.dart';
+
 class CrearUsuarioView extends StatefulWidget {
   final String token;
 
@@ -28,7 +30,7 @@ class _CrearUsuarioViewState extends State<CrearUsuarioView> {
       _cargando = true;
     });
 
-    final url = Uri.parse('http://192.168.0.19:8080/api/admin/usuarios'); // Cambia si usas https o IP real
+    final url = Uri.parse('http://${EnvConfig.baseUrl}:8080/api/admin/usuarios'); // Cambia si usas https o IP real
     final headers = {
       'Content-Type': 'application/json',
       'Authorization': 'Bearer ${widget.token}',
