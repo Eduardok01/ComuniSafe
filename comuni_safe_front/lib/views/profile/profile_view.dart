@@ -3,6 +3,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
+import '../../config/env_config.dart';
+
 class ProfileView extends StatefulWidget {
   const ProfileView({super.key});
 
@@ -46,7 +48,7 @@ class _ProfileViewState extends State<ProfileView> {
       String? idToken = await user.getIdToken();
 
       final response = await http.get(
-        Uri.parse('http://192.168.0.19:8080/api/auth/perfil'),
+        Uri.parse('http://${EnvConfig.baseUrl}:8080/api/auth/perfil'),
         headers: {
           'Authorization': 'Bearer $idToken',
           'Content-Type': 'application/json',
@@ -110,7 +112,7 @@ class _ProfileViewState extends State<ProfileView> {
       };
 
       final response = await http.put(
-        Uri.parse('http://192.168.0.19:8080/api/auth/perfil'),
+        Uri.parse('http://${EnvConfig.baseUrl}:8080/api/auth/perfil'),
         headers: {
           'Authorization': 'Bearer $idToken',
           'Content-Type': 'application/json',

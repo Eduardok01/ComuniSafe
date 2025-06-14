@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../services/usuario_service.dart';
 import '../models/usuario.dart';
+import '../views/admin/crear_usuario_view.dart';
 import '../views/admin/editar_usuario_view.dart';
 
 class AdminUserListView extends StatefulWidget {
@@ -14,7 +15,7 @@ class AdminUserListView extends StatefulWidget {
 
 class _AdminUserListViewState extends State<AdminUserListView> {
   late Future<List<Usuario>> _usuarios;
-  Color _backgroundColor = const Color(0xFFF4E6D0); // color de fondo predeterminado
+  Color _backgroundColor = const Color(0xFFF4E6D0);
 
   @override
   void initState() {
@@ -78,29 +79,49 @@ class _AdminUserListViewState extends State<AdminUserListView> {
     }
   }
 
-  Widget _buildCampoAlineado(String titulo, String valor) {
+  Widget _buildCampoConBotonFuera(String titulo, String valor, {Widget? boton}) {
     return Container(
-      color: _backgroundColor,  // Aquí aplica el color dinámico
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       margin: const EdgeInsets.symmetric(vertical: 4),
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           SizedBox(
-            width: 80,
-            child: Text(
-              '$titulo:',
-              style: const TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 14,
+            width: 280,
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              decoration: BoxDecoration(
+                color: _backgroundColor,
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: Colors.grey.shade400),
+              ),
+              child: Row(
+                children: [
+                  SizedBox(
+                    width: 80,
+                    child: Text(
+                      '$titulo:',
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 14,
+                      ),
+                    ),
+                  ),
+                  Expanded(
+                    child: Text(
+                      valor,
+                      style: const TextStyle(fontSize: 14),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                ],
               ),
             ),
           ),
-          Expanded(
-            child: Text(
-              valor,
-              style: const TextStyle(fontSize: 14),
+          if (boton != null)
+            Padding(
+              padding: const EdgeInsets.only(left: 8),
+              child: boton,
             ),
-          ),
         ],
       ),
     );
@@ -132,23 +153,25 @@ class _AdminUserListViewState extends State<AdminUserListView> {
                       'Selecciona un color de fondo:',
                       style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
                     ),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: 14),
                     Wrap(
                       spacing: 12,
                       runSpacing: 12,
                       children: [
-                        _colorOpcion(const Color(0xFFFFFFFF)), // Blanco
+                        _colorOpcion(const Color(0xFFFFFFFF)),
                         _colorOpcion(const Color(0xFFF4E6D0)),
                         _colorOpcion(const Color(0xFFFEEED9)),
-                        _colorOpcion(Colors.blue.shade50),
-                        _colorOpcion(Colors.green.shade50),
-                        _colorOpcion(Colors.pink.shade50),
-                        _colorOpcion(Colors.amber.shade100),
-                        _colorOpcion(const Color(0xFFE0F7FA)), // cian claro
-                        _colorOpcion(const Color(0xFFFFF9C4)), // amarillo pálido
-                        _colorOpcion(const Color(0xFFFFEBEE)), // rosa pálido
-                        _colorOpcion(const Color(0xFFE8F5E9)), // verde muy claro
-                        _colorOpcion(const Color(0xFFE3F2FD)), // azul muy claro
+                        _colorOpcion(const Color(0xFFE0F7FA)),
+                        _colorOpcion(const Color(0xFFFFF9C4)),
+                        _colorOpcion(const Color(0xFFFFEBEE)),
+                        _colorOpcion(const Color(0xFFE8F5E9)),
+                        _colorOpcion(const Color(0xFFE3F2FD)),
+                        _colorOpcion(const Color(0xFFFFF0E6)),
+                        _colorOpcion(const Color(0xFFFFD6B8)),
+                        _colorOpcion(const Color(0xFFFFB07A)),
+                        _colorOpcion(const Color(0xFFE2734B)),
+                        _colorOpcion(const Color(0xFFCC5F3F)),
+                        _colorOpcion(const Color(0xFF993F2B)),
                       ],
                     ),
                   ],
@@ -179,6 +202,19 @@ class _AdminUserListViewState extends State<AdminUserListView> {
         ),
       ),
     );
+  }
+
+  void _abrirCrearUsuario() async {
+    final creado = await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => CrearUsuarioView(token: widget.token),
+      ),
+    );
+
+    if (creado == true) {
+      _refreshUsuarios();
+    }
   }
 
   @override
@@ -239,38 +275,37 @@ class _AdminUserListViewState extends State<AdminUserListView> {
                     'rol': u.rol,
                   };
                   return Card(
-                    color: const Color(0xFFF9DFA4), // Color fijo para las cards
+                    color: const Color(0xFFF9DFA4),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),
                     elevation: 3,
-                    margin: const EdgeInsets.symmetric(vertical: 8),
+                    margin: const EdgeInsets.symmetric(vertical: 6),
                     child: Padding(
                       padding: const EdgeInsets.all(16),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
-                          _buildCampoAlineado('Nombre', u.name),
-                          _buildCampoAlineado('Correo', u.correo),
-                          _buildCampoAlineado('Teléfono', u.phone),
-                          _buildCampoAlineado('Rol', u.rol),
-                          const SizedBox(height: 12),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.end,
-                            children: [
-                              IconButton(
-                                icon: const Icon(Icons.edit, color: Colors.blueAccent),
-                                tooltip: 'Editar usuario',
-                                onPressed: () => _editarUsuario(usuarioMap),
-                              ),
-                              const SizedBox(width: 8),
-                              IconButton(
-                                icon: const Icon(Icons.delete, color: Colors.redAccent),
-                                tooltip: 'Eliminar usuario',
-                                onPressed: () => _eliminarUsuario(u.uid, u.name),
-                              ),
-                            ],
+                          _buildCampoConBotonFuera(
+                            'Nombre',
+                            u.name,
+                            boton: IconButton(
+                              icon: const Icon(Icons.edit, color: Colors.blueAccent),
+                              tooltip: 'Editar usuario',
+                              onPressed: () => _editarUsuario(usuarioMap),
+                            ),
                           ),
+                          _buildCampoConBotonFuera('Correo', u.correo),
+                          _buildCampoConBotonFuera(
+                            'Teléfono',
+                            u.phone,
+                            boton: IconButton(
+                              icon: const Icon(Icons.delete, color: Colors.redAccent),
+                              tooltip: 'Eliminar usuario',
+                              onPressed: () => _eliminarUsuario(u.uid, u.name),
+                            ),
+                          ),
+                          _buildCampoConBotonFuera('Rol', u.rol),
                         ],
                       ),
                     ),
@@ -280,6 +315,12 @@ class _AdminUserListViewState extends State<AdminUserListView> {
             ),
           );
         },
+      ),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: _abrirCrearUsuario,
+        label: const Text('Nuevo Usuario'),
+        icon: const Icon(Icons.person_add),
+        backgroundColor: const Color(0xFFE2734B),
       ),
     );
   }

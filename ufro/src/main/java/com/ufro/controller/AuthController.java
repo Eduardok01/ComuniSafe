@@ -50,7 +50,7 @@ public class AuthController {
         }
     }
 
-    // 🔥 NUEVO ENDPOINT: Obtener perfil del usuario autenticado
+    // Obtener perfil del usuario autenticado
     @GetMapping("/perfil")
     public ResponseEntity<?> obtenerPerfil(@RequestHeader("Authorization") String authorizationHeader) {
         try {
@@ -61,6 +61,21 @@ public class AuthController {
             return ResponseEntity.ok(usuario);
         } catch (FirebaseAuthException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Token inválido.");
+        }
+    }
+
+    // 🔄 Actualizar perfil del usuario autenticado
+    @PutMapping("/perfil")
+    public ResponseEntity<?> actualizarPerfil(
+            @RequestHeader("Authorization") String authorizationHeader,
+            @RequestBody Map<String, Object> datosActualizados) {
+        try {
+            Usuario actualizado = usuarioService.actualizarPerfilConToken(authorizationHeader, datosActualizados);
+            return ResponseEntity.ok(actualizado);
+        } catch (FirebaseAuthException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Token inválido.");
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         }
     }
 }

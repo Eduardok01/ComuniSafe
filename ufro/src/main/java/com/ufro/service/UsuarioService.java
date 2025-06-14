@@ -216,4 +216,43 @@ public class UsuarioService {
 
         return usuario;
     }
+
+    public Usuario actualizarPerfilConToken(String authorizationHeader, Map<String, Object> nuevosDatos) throws FirebaseAuthException {
+        String idToken = authorizationHeader.replace("Bearer ", "").trim();
+        FirebaseToken decodedToken = authService.verifyIdToken(idToken);
+        String uid = decodedToken.getUid();
+
+        Firestore db = FirestoreClient.getFirestore();
+        DocumentReference docRef = db.collection(COLLECTION_NAME).document(uid);
+
+        try {
+            DocumentSnapshot snapshot = docRef.get().get();
+            if (!snapshot.exists()) {
+                throw new IllegalArgumentException("Usuario no encontrado.");
+            }
+
+            // Aplica los cambios permitidos (evita modificar el UID o rol desde aquí)
+            Map<String, Object> actualizables = new HashMap<>();
+            if (nuevosDatos.containsKey("name")) {
+                actualizables.put("name", nuevosDatos.get("name"));
+            }
+            if (nuevosDatos.containsKey("correo")) {
+                actualizables.put("correo", nuevosDatos.get("correo"));
+            }
+            if (nuevosDatos.containsKey("phone")) {
+                actualizables.put("phone", nuevosDatos.get("phone"));
+            }
+
+            if (!actualizables.isEmpty()) {
+                docRef.update(actualizables).get();
+            }
+
+            return docRef.get().get().toObject(Usuario.class);
+
+        } catch (InterruptedException | ExecutionException e) {
+            e.printStackTrace();
+            throw new IllegalArgumentException("Error actualizando perfil.");
+        }
+    }
+
 }
