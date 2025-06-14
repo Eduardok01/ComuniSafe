@@ -48,8 +48,22 @@ class UsuarioService {
     return response.statusCode == 200;
   }
 
-  Future<Usuario> crearUsuario(Map<String, dynamic> datos) async {
-    // Implementar creación si quieres
-    throw UnimplementedError();
+  Future<Usuario> crearUsuario(Map<String, dynamic> datos, String token) async {
+    final url = Uri.parse('$baseUrl/usuarios');
+
+    final response = await http.post(
+      url,
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token',
+      },
+      body: json.encode(datos),
+    );
+
+    if (response.statusCode == 201) {
+      return Usuario.fromJson(json.decode(response.body));
+    } else {
+      throw Exception('Error al crear usuario: ${response.body}');
+    }
   }
 }
