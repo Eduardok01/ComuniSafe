@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import java.time.Instant;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
@@ -46,6 +47,19 @@ public class ReporteService {
         return future.get().getDocuments().stream()
                 .map(doc -> doc.toObject(Reporte.class))
                 .collect(Collectors.toList());
+    }
+
+    public String eliminarReporte(String reporteId) throws ExecutionException, InterruptedException {
+        Firestore db = FirestoreClient.getFirestore();
+        ApiFuture<WriteResult> writeResult = db.collection("reportes").document(reporteId).delete();
+        return "Reporte eliminado con éxito: " + reporteId;
+    }
+
+    public String editarReporte(String reporteId, Map<String, Object> camposActualizados) throws ExecutionException, InterruptedException {
+        Firestore db = FirestoreClient.getFirestore();
+        DocumentReference docRef = db.collection("reportes").document(reporteId);
+        ApiFuture<WriteResult> future = docRef.update(camposActualizados);
+        return "Campos actualizados en: " + future.get().getUpdateTime();
     }
 
 //    public void guardarReporte(Usuario usuario) {

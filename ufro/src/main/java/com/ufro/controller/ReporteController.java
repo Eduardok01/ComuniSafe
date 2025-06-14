@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
 @RestController
@@ -35,5 +36,15 @@ public class ReporteController {
     @GetMapping
     public List<Reporte> obtenerTodosLosReportes() throws ExecutionException, InterruptedException {
         return reporteService.obtenerTodosLosReportes();
+    }
+
+    @DeleteMapping("/{reporteId}")
+    public String eliminarReporte(@PathVariable String reporteId) throws ExecutionException, InterruptedException {
+        return reporteService.eliminarReporte(reporteId);
+    }
+
+    @PatchMapping("/{reporteId}")
+    public String editarParcialmente(@PathVariable String reporteId, @RequestBody Map<String, Object> campos) throws ExecutionException, InterruptedException {
+        return reporteService.editarReporte(reporteId, campos);
     }
 }
