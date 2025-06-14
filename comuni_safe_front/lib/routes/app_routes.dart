@@ -5,6 +5,9 @@ import 'package:comuni_safe_front/views/home/home_view.dart';
 import 'package:comuni_safe_front/views/home/emergency_contacts_view.dart';
 import 'package:comuni_safe_front/views/profile/profile_view.dart';  // <-- Importa ProfileView
 import '../views/home/admin_home_view.dart';
+import 'package:comuni_safe_front/views/map/map_view.dart';
+
+import '../views/reports/report_view.dart';
 
 final Map<String, WidgetBuilder> appRoutes = {
   'login': (BuildContext context) => const LoginView(),
@@ -13,4 +16,6 @@ final Map<String, WidgetBuilder> appRoutes = {
   'emergency_contacts': (context) => const EmergencyContactsView(),
   'admin_home': (context) => const AdminHomeView(),
   'profile': (context) => const ProfileView(),  // <-- Agrega la ruta para ProfileView
+  'map': (context) => const MapView(),
+  'report': (context) => const ReportView(),
 };

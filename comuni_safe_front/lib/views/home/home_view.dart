@@ -53,7 +53,7 @@ class HomeView extends StatelessWidget {
               'assets/mapa-logo.png',
               'Ver el mapa',
                   () {
-                // lógica para el mapa
+                Navigator.pushNamed(context, 'map');
               },
             ),
 
