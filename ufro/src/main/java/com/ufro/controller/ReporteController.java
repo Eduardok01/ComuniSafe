@@ -6,6 +6,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
@@ -23,7 +24,6 @@ public class ReporteController {
     @PostMapping
     public ResponseEntity<?> crearReporte(@RequestBody Reporte reporte) {
         try {
-            // Validaciones simples
             if (reporte.getTipo() == null || reporte.getTipo().isEmpty()) {
                 return ResponseEntity.badRequest().body("El tipo de reporte es obligatorio");
             }
@@ -45,5 +45,49 @@ public class ReporteController {
         }
     }
 
-    // Otros endpoints como GET, PUT, DELETE pueden ir acá
+    @PutMapping("/{id}")
+    public ResponseEntity<?> actualizarReporte(@PathVariable String id, @RequestBody Reporte reporte) {
+        boolean actualizado = reporteService.actualizarReporte(id, reporte);
+        if (actualizado) {
+            return ResponseEntity.ok("Reporte actualizado correctamente");
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> eliminarReporte(@PathVariable String id) {
+        boolean eliminado = reporteService.eliminarReporte(id);
+        if (eliminado) {
+            return ResponseEntity.ok("Reporte eliminado correctamente");
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    @GetMapping("/tipo/{tipo}")
+    public ResponseEntity<?> obtenerReportesPorTipo(@PathVariable String tipo) {
+        try {
+            List<Reporte> reportesFiltrados = reporteService.obtenerReportesPorTipo(tipo.toLowerCase());
+            return ResponseEntity.ok(reportesFiltrados);
+        } catch (ExecutionException | InterruptedException e) {
+            e.printStackTrace();
+            return ResponseEntity.status(500).body("Error al obtener reportes por tipo: " + e.getMessage());
+        }
+    }
+
+    // Nuevo endpoint para conteo
+    @GetMapping("/count/{tipo}")
+    public ResponseEntity<?> contarReportesPorTipo(@PathVariable String tipo) {
+        try {
+            long cantidad = reporteService.contarReportesPorTipo(tipo.toLowerCase());
+            Map<String, Object> respuesta = new HashMap<>();
+            respuesta.put("tipo", tipo);
+            respuesta.put("cantidad", cantidad);
+            return ResponseEntity.ok(respuesta);
+        } catch (ExecutionException | InterruptedException e) {
+            e.printStackTrace();
+            return ResponseEntity.status(500).body("Error al contar reportes por tipo: " + e.getMessage());
+        }
+    }
 }

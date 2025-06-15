@@ -128,9 +128,7 @@ class _ProfileViewState extends State<ProfileView> {
           isLoading = false;
           error = '';
         });
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Perfil actualizado correctamente')),
-        );
+        await _showMessageDialog('¡Perfil actualizado!', 'Tus datos se actualizaron correctamente.', titleColor: Colors.green);
       } else {
         setState(() {
           error = 'Error al actualizar perfil: ${response.statusCode}';
@@ -143,6 +141,38 @@ class _ProfileViewState extends State<ProfileView> {
         isLoading = false;
       });
     }
+  }
+
+  Future<void> _showMessageDialog(String title, String message, {Color? titleColor}) {
+    return showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => AlertDialog(
+        title: Center(
+          child: Text(
+            title,
+            style: TextStyle(
+              fontSize: 22,
+              fontWeight: FontWeight.bold,
+              color: titleColor ?? Colors.black87,
+            ),
+          ),
+        ),
+        content: Text(
+          message,
+          textAlign: TextAlign.center,
+          style: const TextStyle(fontSize: 18),
+        ),
+        actions: [
+          Center(
+            child: TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('OK', style: TextStyle(fontSize: 18)),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   void mostrarDialogoCambioClave() {
@@ -235,7 +265,7 @@ class _ProfileViewState extends State<ProfileView> {
             ),
         ],
       ),
-      backgroundColor: const Color(0xFFFFF5EE), // ← FONDO AÑADIDO AQUÍ
+      backgroundColor: const Color(0xFFFFF5EE),
       body: isLoading
           ? const Center(child: CircularProgressIndicator())
           : error.isNotEmpty

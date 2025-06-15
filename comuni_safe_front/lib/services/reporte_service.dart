@@ -6,10 +6,9 @@ import '../models/reporte.dart';
 class ReporteService {
   static final String _baseUrl = '${EnvConfig.baseUrl}/api/reportes';
 
-  /// Envía el reporte al backend y devuelve true si fue exitoso.
+  /// Crear reporte
   static Future<bool> enviarReporte(Reporte reporte) async {
     final url = Uri.parse(_baseUrl);
-
     final Map<String, dynamic> jsonReporte = reporte.toJson();
 
     DateTime fecha = reporte.fechaHora;
@@ -30,7 +29,7 @@ class ReporteService {
     );
 
     if (response.statusCode == 200 || response.statusCode == 201) {
-      final Map<String, dynamic> data = jsonDecode(response.body);
+      final data = jsonDecode(response.body);
       if (data.containsKey('mensaje')) {
         print('Backend dice: ${data['mensaje']}');
       }
@@ -41,16 +40,79 @@ class ReporteService {
     }
   }
 
-  /// Obtiene todos los reportes del backend.
+  /// Obtener todos los reportes
   static Future<List<Reporte>> obtenerReportes() async {
     final url = Uri.parse(_baseUrl);
     final response = await http.get(url);
 
     if (response.statusCode == 200) {
-      List<dynamic> body = jsonDecode(response.body);
+      final List<dynamic> body = jsonDecode(response.body);
       return body.map((e) => Reporte.fromJson(e)).toList();
     } else {
       throw Exception('Error al cargar los reportes: ${response.statusCode}');
+    }
+  }
+
+  /// Obtener reportes por tipo
+  static Future<List<Reporte>> obtenerPorTipo(String tipo) async {
+    final url = Uri.parse('$_baseUrl/tipo/$tipo');
+    final response = await http.get(url);
+
+    if (response.statusCode == 200) {
+      final List<dynamic> body = jsonDecode(response.body);
+      return body.map((e) => Reporte.fromJson(e)).toList();
+    } else {
+      throw Exception('Error al filtrar reportes por tipo: ${response.statusCode}');
+    }
+  }
+
+  /// Eliminar un reporte
+  static Future<bool> eliminarReporte(String id) async {
+    final url = Uri.parse('$_baseUrl/$id');
+    final response = await http.delete(url);
+
+    if (response.statusCode == 200) {
+      print('Reporte eliminado exitosamente');
+      return true;
+    } else {
+      print('Error al eliminar reporte: ${response.statusCode} - ${response.body}');
+      return false;
+    }
+  }
+
+  /// Actualizar un reporte existente
+  static Future<bool> actualizarReporte(Reporte reporte) async {
+    final url = Uri.parse('$_baseUrl/${reporte.id}');
+    final response = await http.put(
+      url,
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode(reporte.toJson()),
+    );
+
+    if (response.statusCode == 200) {
+      print('Reporte actualizado exitosamente');
+      return true;
+    } else {
+      print('Error al actualizar reporte: ${response.statusCode} - ${response.body}');
+      return false;
+    }
+  }
+
+  /// Obtener el conteo de reportes por tipo
+  /// Espera que el backend responda con JSON { "count": <int> }
+  static Future<int> obtenerConteoPorTipo(String tipo) async {
+    final url = Uri.parse('$_baseUrl/conteo/tipo/$tipo');
+    final response = await http.get(url);
+
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+      if (data is Map<String, dynamic> && data.containsKey('count')) {
+        return data['count'] as int;
+      } else {
+        throw Exception('Respuesta inesperada del backend');
+      }
+    } else {
+      throw Exception('Error al obtener conteo de reportes por tipo: ${response.statusCode}');
     }
   }
 }

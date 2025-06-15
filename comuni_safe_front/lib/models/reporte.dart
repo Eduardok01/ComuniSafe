@@ -1,4 +1,5 @@
 class Reporte {
+  String? id; // Campo opcional
   String tipo;
   String descripcion;
   bool pendiente;
@@ -9,6 +10,7 @@ class Reporte {
   String usuarioId;
 
   Reporte({
+    this.id,
     required this.tipo,
     required this.descripcion,
     required this.pendiente,
@@ -20,6 +22,7 @@ class Reporte {
   });
 
   factory Reporte.fromJson(Map<String, dynamic> json) => Reporte(
+    id: json['id'] as String?,
     tipo: json['tipo'] as String,
     descripcion: json['descripcion'] as String,
     pendiente: json['pendiente'] as bool,
@@ -40,7 +43,7 @@ class Reporte {
       fechaHora.second,
     );
 
-    return {
+    final Map<String, dynamic> data = {
       'tipo': tipo,
       'descripcion': descripcion,
       'pendiente': pendiente,
@@ -50,5 +53,11 @@ class Reporte {
       'fechaHora': fechaSinDecimales.toIso8601String(),
       'usuarioId': usuarioId,
     };
+
+    if (id != null) {
+      data['id'] = id;
+    }
+
+    return data;
   }
 }
