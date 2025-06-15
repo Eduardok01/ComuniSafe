@@ -1,10 +1,8 @@
 package com.ufro.model;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
-import java.time.LocalDateTime;
+import java.util.Date;
 
 @Data
 @NoArgsConstructor
@@ -17,6 +15,6 @@ public class Reporte {
     private Double latitud;
     private Double longitud;
     private String direccion;
-    private LocalDateTime fechaHora; // ✅ cambiado a LocalDateTime
+    private Date fechaHora;
     private String usuarioId;
 }

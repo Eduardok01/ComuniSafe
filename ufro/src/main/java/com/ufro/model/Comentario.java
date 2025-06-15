@@ -1,9 +1,11 @@
 package com.ufro.model;
 
-import com.google.cloud.Timestamp;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.util.Date;
 
 
 @Data
@@ -11,6 +13,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class Comentario {
     private String texto;
-    private Timestamp fechaHora;
+    private Date fechaHora;
     private String usuarioId;
 }

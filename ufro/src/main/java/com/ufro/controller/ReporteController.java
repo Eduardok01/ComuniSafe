@@ -5,7 +5,7 @@ import com.ufro.service.ReporteService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
@@ -20,8 +20,9 @@ public class ReporteController {
         this.reporteService = reporteService;
     }
 
-    @PostMapping
-    public ResponseEntity<?> crearReporte(@RequestBody Reporte reporte) {
+  /*
+    @PostMapping("/crear")
+    public ResponseEntity<?> crearReporte2(@RequestBody Reporte reporte) {
         try {
             // Validaciones simples
             if (reporte.getTipo() == null || reporte.getTipo().isEmpty()) {
@@ -44,6 +45,30 @@ public class ReporteController {
             return ResponseEntity.status(500).body("Error al crear el reporte: " + e.getMessage());
         }
     }
+  */
+  
+    @PostMapping
+    public String crearReporte(@RequestBody Reporte reporte) throws ExecutionException, InterruptedException {
+        return reporteService.crearReporte(reporte);
+    }
 
-    // Otros endpoints como GET, PUT, DELETE pueden ir acá
+    @PutMapping("/{id}/estado")
+    public String actualizarEstado(@PathVariable String id) throws ExecutionException, InterruptedException {
+        return reporteService.actualizarEstado(id);
+    }
+
+    @GetMapping
+    public List<Reporte> obtenerTodosLosReportes() throws ExecutionException, InterruptedException {
+        return reporteService.obtenerTodosLosReportes();
+    }
+
+    @DeleteMapping("/{reporteId}")
+    public String eliminarReporte(@PathVariable String reporteId) throws ExecutionException, InterruptedException {
+        return reporteService.eliminarReporte(reporteId);
+    }
+
+    @PatchMapping("/{reporteId}")
+    public String editarParcialmente(@PathVariable String reporteId, @RequestBody Map<String, Object> campos) throws ExecutionException, InterruptedException {
+        return reporteService.editarReporte(reporteId, campos);
+    }
 }
