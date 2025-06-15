@@ -1,7 +1,11 @@
 package com.ufro.service;
 
+import com.ufro.model.Reporte;
 import com.google.api.core.ApiFuture;
-import com.google.cloud.firestore.*;
+import com.google.cloud.Timestamp;
+import com.google.cloud.firestore.DocumentReference;
+import com.google.cloud.firestore.Firestore;
+import com.google.cloud.firestore.WriteResult;
 import com.google.firebase.cloud.FirestoreClient;
 import com.ufro.model.Reporte;
 import org.springframework.stereotype.Service;
@@ -11,7 +15,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
-import java.util.stream.Collectors;
 
 @Service
 public class ReporteService {
@@ -27,26 +30,12 @@ public class ReporteService {
 
         return "Reporte creado en: " + reporte.getTipo();
     }
-
-    public String actualizarEstado(String id) throws ExecutionException, InterruptedException {
+  
+      public String actualizarEstado(String id) throws ExecutionException, InterruptedException {
         Firestore db = FirestoreClient.getFirestore();
         DocumentReference docRef = db.collection(COLLECTION_NAME).document(id);
         ApiFuture<WriteResult> future = docRef.update("pendiente", false);
         return "Estado actualizado en: " + future.get().getUpdateTime();
-    }
-
-    public Reporte obtenerReporte(String id) throws ExecutionException, InterruptedException {
-        Firestore db = FirestoreClient.getFirestore();
-        DocumentSnapshot snapshot = db.collection(COLLECTION_NAME).document(id).get().get();
-        return snapshot.exists() ? snapshot.toObject(Reporte.class) : null;
-    }
-
-    public List<Reporte> obtenerTodosLosReportes() throws ExecutionException, InterruptedException {
-        Firestore db = FirestoreClient.getFirestore();
-        ApiFuture<QuerySnapshot> future = db.collection(COLLECTION_NAME).get();
-        return future.get().getDocuments().stream()
-                .map(doc -> doc.toObject(Reporte.class))
-                .collect(Collectors.toList());
     }
 
     public String eliminarReporte(String reporteId) throws ExecutionException, InterruptedException {
@@ -62,6 +51,38 @@ public class ReporteService {
         return "Campos actualizados en: " + future.get().getUpdateTime();
     }
 
+  /*
+   public String crearReporte(Reporte reporte) throws ExecutionException, InterruptedException {
+        Firestore db = FirestoreClient.getFirestore();
+        String id = db.collection(COLLECTION_NAME).document().getId(); // Genera ID
+        DocumentReference docRef = db.collection(COLLECTION_NAME).document(id);
+        reporte.setId(id);
+        reporte.setPendiente(true);
+
+        // Construir un Map para enviar datos, incluyendo la conversión correcta de fechaHora
+        Map<String, Object> datos = new HashMap<>();
+        datos.put("id", reporte.getId());
+        datos.put("tipo", reporte.getTipo());
+        datos.put("descripcion", reporte.getDescripcion());
+        datos.put("pendiente", reporte.getPendiente());
+        datos.put("latitud", reporte.getLatitud());
+        datos.put("longitud", reporte.getLongitud());
+        datos.put("direccion", reporte.getDireccion());
+
+        // Convertir LocalDateTime a Timestamp Firestore usando toEpochSecond y getNano
+        datos.put("fechaHora", Timestamp.ofTimeSecondsAndNanos(
+                reporte.getFechaHora().toEpochSecond(ZoneOffset.UTC),
+                reporte.getFechaHora().getNano()
+        ));
+
+        datos.put("usuarioId", reporte.getUsuarioId());
+
+        ApiFuture<WriteResult> future = docRef.set(datos);
+        future.get(); // Espera a que se complete la escritura
+        return id;
+    }
+  */
+  
 //    public void guardarReporte(Usuario usuario) {
 //        Firestore db = FirestoreClient.getFirestore();
 //        ApiFuture<WriteResult> future = db.collection(COLLECTION_NAME)

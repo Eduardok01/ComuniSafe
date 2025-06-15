@@ -30,7 +30,7 @@ public class UsuarioService {
                 .set(usuario);
 
         try {
-            WriteResult result = future.get(); // Espera hasta que termine la escritura
+            WriteResult result = future.get();
             System.out.println("Usuario guardado en Firestore: " + usuario.getUid() + " at " + result.getUpdateTime());
         } catch (InterruptedException | ExecutionException e) {
             System.err.println("Error guardando usuario en Firestore: " + e.getMessage());
@@ -54,11 +54,7 @@ public class UsuarioService {
 
     public Map<String, Object> loginConToken(String authorizationHeader) throws FirebaseAuthException {
         String idToken = authorizationHeader.replace("Bearer ", "").trim();
-        System.out.println("Token recibido: " + idToken);
-
         FirebaseToken decodedToken = authService.verifyIdToken(idToken);
-        System.out.println("Token verificado. UID: " + decodedToken.getUid() + ", Email: " + decodedToken.getEmail());
-
         String uid = decodedToken.getUid();
         String email = decodedToken.getEmail();
 
@@ -88,7 +84,6 @@ public class UsuarioService {
         return usuario;
     }
 
-    // 🔥 MÉTODO MEJORADO: Obtener perfil y crear si no existe
     public Usuario obtenerUsuarioConToken(String authorizationHeader) throws FirebaseAuthException {
         String idToken = authorizationHeader.replace("Bearer ", "").trim();
         FirebaseToken decodedToken = authService.verifyIdToken(idToken);
@@ -103,7 +98,6 @@ public class UsuarioService {
             if (snapshot.exists()) {
                 return snapshot.toObject(Usuario.class);
             } else {
-                // Crear nuevo usuario con datos básicos
                 Usuario nuevoUsuario = new Usuario();
                 nuevoUsuario.setUid(uid);
                 nuevoUsuario.setCorreo(email);
@@ -112,7 +106,6 @@ public class UsuarioService {
                 nuevoUsuario.setRol("user");
 
                 guardarUsuario(nuevoUsuario);
-
                 return nuevoUsuario;
             }
         } catch (InterruptedException | ExecutionException e) {
@@ -127,61 +120,60 @@ public class UsuarioService {
     }
 
     public void borrarUsuario(String uid) throws Exception {
-        // Eliminar en Firestore
         Firestore db = FirestoreClient.getFirestore();
         ApiFuture<WriteResult> future = db.collection(COLLECTION_NAME).document(uid).delete();
+        future.get();
+        System.out.println("Usuario eliminado de Firestore: " + uid);
 
-        try {
-            future.get(); // Esperar a que termine la operación
-            System.out.println("Usuario eliminado de Firestore: " + uid);
-        } catch (InterruptedException | ExecutionException e) {
-            throw new Exception("Error eliminando usuario en Firestore: " + e.getMessage());
-        }
-
-        // Eliminar en Firebase Authentication
-        try {
-            FirebaseAuth.getInstance().deleteUser(uid);
-            System.out.println("Usuario eliminado de Firebase Auth: " + uid);
-        } catch (FirebaseAuthException e) {
-            throw new Exception("Error eliminando usuario en Firebase Auth: " + e.getMessage());
-        }
+        FirebaseAuth.getInstance().deleteUser(uid);
+        System.out.println("Usuario eliminado de Firebase Auth: " + uid);
     }
 
     public Usuario editarUsuario(String uid, Map<String, Object> datosActualizados) throws ExecutionException, InterruptedException {
         Firestore db = FirestoreClient.getFirestore();
         DocumentReference docRef = db.collection(COLLECTION_NAME).document(uid);
 
-        // Verifica que exista
         DocumentSnapshot snapshot = docRef.get().get();
         if (!snapshot.exists()) {
             throw new IllegalArgumentException("Usuario no encontrado");
         }
 
-        // Si se está actualizando el rol, actualizar también los custom claims en Firebase Auth
+        // 🔒 Si se proporciona una nueva contraseña, actualizar en Firebase Auth
+        if (datosActualizados.containsKey("password")) {
+            String nuevaPassword = (String) datosActualizados.get("password");
+            if (nuevaPassword != null && !nuevaPassword.isBlank()) {
+                try {
+                    UserRecord.UpdateRequest request = new UserRecord.UpdateRequest(uid)
+                            .setPassword(nuevaPassword);
+                    FirebaseAuth.getInstance().updateUser(request);
+                    System.out.println("Contraseña actualizada para UID: " + uid);
+                } catch (FirebaseAuthException e) {
+                    System.err.println("Error actualizando contraseña: " + e.getMessage());
+                    throw new RuntimeException("No se pudo actualizar la contraseña");
+                }
+            }
+            datosActualizados.remove("password"); // No guardar la password en Firestore
+        }
+
+        // Rol
         if (datosActualizados.containsKey("rol")) {
             String nuevoRol = (String) datosActualizados.get("rol");
             try {
                 FirebaseAuth.getInstance().setCustomUserClaims(uid, Map.of("role", nuevoRol));
                 System.out.println("Custom claim 'role' actualizado para UID " + uid + " con valor: " + nuevoRol);
             } catch (FirebaseAuthException e) {
-                System.err.println("Error actualizando custom claims en Firebase Auth: " + e.getMessage());
-                // Podrías lanzar excepción o manejar el error según tu lógica
+                System.err.println("Error actualizando custom claims: " + e.getMessage());
             }
         }
 
-        // Aplica los cambios en Firestore
         docRef.update(datosActualizados).get();
-
-        // Devuelve el usuario actualizado
         DocumentSnapshot updatedSnapshot = docRef.get().get();
         return updatedSnapshot.toObject(Usuario.class);
     }
 
-    // Nuevo método para crear usuario desde Map
     public Usuario crearUsuario(Map<String, Object> nuevoUsuario) throws Exception {
-        // Extraer datos del mapa
         String email = (String) nuevoUsuario.get("correo");
-        String password = (String) nuevoUsuario.get("password");  // O puede venir en otro campo, depende de tu frontend
+        String password = (String) nuevoUsuario.get("password");
         String name = (String) nuevoUsuario.get("name");
         String phone = (String) nuevoUsuario.get("phone");
         String rol = (String) nuevoUsuario.getOrDefault("rol", "user");
@@ -190,7 +182,6 @@ public class UsuarioService {
             throw new IllegalArgumentException("Email y password son requeridos");
         }
 
-        // Crear usuario en Firebase Authentication
         UserRecord.CreateRequest request = new UserRecord.CreateRequest()
                 .setEmail(email)
                 .setEmailVerified(false)
@@ -200,10 +191,8 @@ public class UsuarioService {
         UserRecord userRecord = FirebaseAuth.getInstance().createUser(request);
         String uid = userRecord.getUid();
 
-        // Asignar rol custom claim
         FirebaseAuth.getInstance().setCustomUserClaims(uid, Map.of("role", rol));
 
-        // Crear objeto Usuario para Firestore
         Usuario usuario = new Usuario();
         usuario.setUid(uid);
         usuario.setCorreo(email);
@@ -211,9 +200,7 @@ public class UsuarioService {
         usuario.setPhone(phone != null ? phone : "No disponible");
         usuario.setRol(rol);
 
-        // Guardar en Firestore
         guardarUsuario(usuario);
-
         return usuario;
     }
 
@@ -231,7 +218,6 @@ public class UsuarioService {
                 throw new IllegalArgumentException("Usuario no encontrado.");
             }
 
-            // Aplica los cambios permitidos (evita modificar el UID o rol desde aquí)
             Map<String, Object> actualizables = new HashMap<>();
             if (nuevosDatos.containsKey("name")) {
                 actualizables.put("name", nuevosDatos.get("name"));
@@ -254,5 +240,4 @@ public class UsuarioService {
             throw new IllegalArgumentException("Error actualizando perfil.");
         }
     }
-
 }

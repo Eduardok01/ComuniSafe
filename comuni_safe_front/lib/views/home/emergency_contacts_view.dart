@@ -14,7 +14,7 @@ class _EmergencyContactsViewState extends State<EmergencyContactsView> {
     return Scaffold(
       backgroundColor: const Color(0xFFF4E6D0),
       appBar: AppBar(
-        backgroundColor: const Color(0xFFD2C0A5),
+        backgroundColor: const Color(0xFFE2734B),
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.black),

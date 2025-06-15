@@ -5,7 +5,7 @@ import '../config/env_config.dart';
 import '../models/usuario.dart';
 
 class UsuarioService {
-  final String baseUrl = 'http://${EnvConfig.baseUrl}:8080/api/admin'; // Cambia por tu URL real
+  final String baseUrl = '${EnvConfig.baseUrl}/api/admin'; // Cambia por tu URL real
 
   Future<List<Usuario>> obtenerUsuarios(String token) async {
     final url = Uri.parse('$baseUrl/usuarios');
@@ -43,7 +43,7 @@ class UsuarioService {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $token',
       },
-      body: json.encode(datos),
+      body: json.encode(datos), // Aquí puedes enviar también {"password": "nuevaClave"}
     );
 
     return response.statusCode == 200;

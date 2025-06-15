@@ -8,7 +8,7 @@ import java.util.Date;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Reporte {
-
+    private String id;
     private String tipo;
     private String descripcion;
     private Boolean pendiente;
