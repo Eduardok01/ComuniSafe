@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
 
 class TutorialView extends StatefulWidget {
   const TutorialView({super.key});
@@ -69,10 +71,15 @@ class _TutorialViewState extends State<TutorialView> {
                 const SizedBox(height: 20),
                 if (_currentPage == _pages.length - 1)
                   ElevatedButton(
-                    onPressed: () {
-                      // Guardar en SharedPreferences que el tutorial ya fue visto
-                      Navigator.pushReplacementNamed(context, 'login');
-                    },
+                    onPressed: () async {
+                      final prefs = await SharedPreferences.getInstance();
+                      await prefs.setBool('first_time', false);
+
+                      if (mounted) {
+                        Navigator.pushReplacementNamed(context, 'login');
+                      }
+                    }
+                    ,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color(0xFFE2734B),
                       padding: const EdgeInsets.symmetric(
