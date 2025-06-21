@@ -9,7 +9,9 @@ import com.google.firebase.auth.FirebaseAuthException;
 import com.google.firebase.auth.FirebaseToken;
 import com.google.firebase.cloud.FirestoreClient;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
 
@@ -19,8 +21,15 @@ public class UsuarioService {
     private static final String COLLECTION_NAME = "usuarios";
     private final FirebaseAuthService authService;
 
-    public UsuarioService(FirebaseAuthService authService) {
+    private final FirebaseStorageService storageService;
+
+
+    public UsuarioService(FirebaseAuthService authService, FirebaseStorageService storageService
+    ) {
+
         this.authService = authService;
+        this.storageService = storageService;
+
     }
 
     public void guardarUsuario(Usuario usuario) {
@@ -240,4 +249,70 @@ public class UsuarioService {
             throw new IllegalArgumentException("Error actualizando perfil.");
         }
     }
+
+    public String actualizarFotoPerfil(String uid, MultipartFile foto) throws IOException, ExecutionException, InterruptedException {
+        // Validación de parámetros
+        if (foto == null || foto.isEmpty()) {
+            throw new IllegalArgumentException("La foto no puede estar vacía");
+        }
+        if (uid == null || uid.trim().isEmpty()) {
+            throw new IllegalArgumentException("El UID del usuario es requerido");
+        }
+
+        try {
+            // Subir nueva foto
+            String photoUrl = storageService.uploadProfilePhoto(foto, uid);
+
+            // Actualizar el usuario en Firestore
+            Firestore db = FirestoreClient.getFirestore();
+            DocumentReference docRef = db.collection(COLLECTION_NAME).document(uid);
+
+            // Obtener la URL anterior si existe
+            DocumentSnapshot doc = docRef.get().get();
+            if (doc.exists()) {
+                String oldPhotoUrl = doc.getString("photoUrl");
+                if (oldPhotoUrl != null) {
+                    // Eliminar la foto anterior
+                    storageService.deleteProfilePhoto(oldPhotoUrl);
+                }
+            }
+
+            // Actualizar con la nueva URL
+            docRef.update("photoUrl", photoUrl).get();
+
+            return photoUrl;
+        } catch (Exception e) {
+            throw new RuntimeException("Error al actualizar la foto de perfil: " + e.getMessage(), e);
+        }
+    }
+
+
+    public void eliminarFotoPerfil(String uid) throws ExecutionException, InterruptedException {
+        if (uid == null || uid.trim().isEmpty()) {
+            throw new IllegalArgumentException("El UID del usuario es requerido");
+        }
+
+        try {
+            Firestore db = FirestoreClient.getFirestore();
+            DocumentReference docRef = db.collection(COLLECTION_NAME).document(uid);
+
+            DocumentSnapshot doc = docRef.get().get();
+            if (doc.exists()) {
+                String photoUrl = doc.getString("photoUrl");
+                if (photoUrl != null) {
+                    // Eliminar la foto del storage
+                    storageService.deleteProfilePhoto(photoUrl);
+
+                    // Actualizar el usuario sin foto
+                    docRef.update("photoUrl", null).get();
+                }
+            } else {
+                throw new IllegalArgumentException("Usuario no encontrado");
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("Error al eliminar la foto de perfil: " + e.getMessage(), e);
+        }
+    }
 }
+
+
