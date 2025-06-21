@@ -13,4 +13,7 @@ public class Usuario {
     private String phone;
     private String correo;
     private String rol; // admin / usuario
+
+    private String photoUrl;
+
 }
