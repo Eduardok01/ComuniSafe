@@ -22,6 +22,7 @@ public class FirebaseInitializer {
 
         FirebaseOptions options = FirebaseOptions.builder()
                 .setCredentials(GoogleCredentials.fromStream(serviceAccount))
+                .setStorageBucket("comunisafe-f8f8d.appspot.com") // se agrego esta linea, asegurarse que los bucket tengan el mismo nombre
                 .build();
 
         if (FirebaseApp.getApps().isEmpty()) {
