@@ -93,4 +93,25 @@ public class AdminController {
         }
         return ResponseEntity.ok(usuarioService.obtenerTodos());
     }
+
+    @DeleteMapping("/usuarios/{uid}/foto")
+    public ResponseEntity<String> eliminarFotoPerfilUsuario(
+            @RequestHeader("Authorization") String authorizationHeader,
+            @PathVariable String uid) {
+        try {
+            // Verificar que sea administrador
+            Map<String, Object> claims = usuarioService.loginConToken(authorizationHeader);
+            String role = (String) claims.get("role");
+            if (!"admin".equals(role)) {
+                return ResponseEntity.status(403).body("No autorizado");
+            }
+
+            // Eliminar la foto del usuario
+            usuarioService.eliminarFotoPerfil(uid);
+            return ResponseEntity.ok("Foto de perfil eliminada correctamente");
+        } catch (Exception e) {
+            return ResponseEntity.status(500)
+                    .body("Error al eliminar la foto de perfil: " + e.getMessage());
+        }
+    }
 }
