@@ -11,6 +11,7 @@ dependencies:
   flutter:
     sdk: flutter
 
+  image_picker: ^1.1.0
   firebase_core: ^3.14.0
   firebase_auth: ^5.6.0
   cloud_firestore: ^5.6.9
@@ -53,3 +54,5 @@ flutter:
     - assets/espacios.png
     - assets/robo.png
     - assets/ambulancia.png
+    - assets/default_avatar.png
+    - assets/default_reporte.png

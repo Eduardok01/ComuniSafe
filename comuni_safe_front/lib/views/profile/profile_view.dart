@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'dart:io';
+import 'package:image_picker/image_picker.dart';
 
 import '../../config/env_config.dart';
 
@@ -23,6 +25,8 @@ class _ProfileViewState extends State<ProfileView> {
   late TextEditingController correoController;
   late TextEditingController phoneController;
 
+  File? _imagenSeleccionada;
+  final ImagePicker _picker = ImagePicker();
   @override
   void initState() {
     super.initState();
@@ -83,6 +87,52 @@ class _ProfileViewState extends State<ProfileView> {
           isLoading = false;
         });
       }
+    }
+  }
+
+  Future<void> seleccionarImagen() async {
+    final XFile? imagen = await _picker.pickImage(source: ImageSource.gallery);
+    if (imagen != null) {
+      setState(() {
+        _imagenSeleccionada = File(imagen.path);
+      });
+      subirImagen(imagen);
+    }
+  }
+
+  Future<void> subirImagen(XFile imagen) async {
+    try {
+      User? user = FirebaseAuth.instance.currentUser;
+      if (user == null) return;
+
+      final String? idToken = await user.getIdToken();
+
+      final request = http.MultipartRequest(
+        'POST',
+        Uri.parse('${EnvConfig.baseUrl}/api/usuarios/${user.uid}/foto'),
+      )
+        ..headers['Authorization'] = 'Bearer $idToken'
+        ..files.add(await http.MultipartFile.fromPath('foto', imagen.path));
+
+      final response = await request.send();
+
+      if (response.statusCode == 200) {
+        final respuestaTexto = await response.stream.bytesToString();
+        setState(() {
+          usuario?['photoUrl'] = respuestaTexto;
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Foto de perfil actualizada')),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error al subir foto: ${response.statusCode}')),
+        );
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error inesperado al subir imagen: $e')),
+      );
     }
   }
 
@@ -246,6 +296,28 @@ class _ProfileViewState extends State<ProfileView> {
           key: _formKey,
           child: ListView(
             children: [
+              Center(
+                child: Column(
+                  children: [
+                    CircleAvatar(
+                      radius: 50,
+                      backgroundImage: _imagenSeleccionada != null
+                          ? FileImage(_imagenSeleccionada!)
+                          : (usuario?['photoUrl'] != null
+                          ? NetworkImage(usuario!['photoUrl']) as ImageProvider
+                          : const AssetImage('assets/default_avatar.png')),
+                    ),
+                    const SizedBox(height: 8),
+                    TextButton.icon(
+                      onPressed: seleccionarImagen,
+                      icon: const Icon(Icons.photo),
+                      label: const Text('Cambiar Foto'),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 20),
+
               _buildEditableCampo('Nombre', nameController, enabled: isEditing),
               _buildEditableCampo(
                 'Correo',

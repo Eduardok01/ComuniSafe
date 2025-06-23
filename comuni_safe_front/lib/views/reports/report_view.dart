@@ -6,6 +6,8 @@ import 'package:http/http.dart' as http;
 
 import '../../config/env_config.dart';
 import '../../models/reporte.dart';
+import 'dart:io';
+import 'package:image_picker/image_picker.dart';
 
 class ReportView extends StatefulWidget {
   const ReportView({super.key});
@@ -17,6 +19,8 @@ class ReportView extends StatefulWidget {
 class _ReportViewState extends State<ReportView> {
   String selectedCategory = '';
   final TextEditingController descriptionController = TextEditingController();
+  File? _imagenSeleccionada;
+  final ImagePicker _picker = ImagePicker();
 
   void selectCategory(String category) {
     setState(() {
@@ -131,7 +135,70 @@ class _ReportViewState extends State<ReportView> {
     );
   }
 
+  Future<void> _seleccionarImagen(ImageSource fuente) async {
+    final XFile? imagen = await _picker.pickImage(source: fuente);
+    if (imagen != null) {
+      setState(() {
+        _imagenSeleccionada = File(imagen.path);
+      });
+    }
+  }
 
+  void _mostrarOpciones() {
+    showModalBottomSheet(
+      context: context,
+      builder: (_) => Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          ListTile(
+            leading: Icon(Icons.camera_alt),
+            title: Text('Tomar foto'),
+            onTap: () {
+              Navigator.pop(context);
+              _seleccionarImagen(ImageSource.camera);
+            },
+          ),
+          ListTile(
+            leading: Icon(Icons.photo_library),
+            title: Text('Seleccionar desde galería'),
+            onTap: () {
+              Navigator.pop(context);
+              _seleccionarImagen(ImageSource.gallery);
+            },
+          ),
+        ],
+      ),
+    );
+  }
+/*
+  Future<void> _elegirImagen() async {
+    final ImagePicker picker = ImagePicker();
+    final XFile? imagen = await picker.pickImage(
+      source: ImageSource.gallery, // o .camera
+      imageQuality: 75,
+    );
+
+    if (imagen != null) {
+      setState(() {
+        _imagenSeleccionada = File(imagen.path);
+      });
+    }
+  }
+
+  Future<void> _tomarFoto() async {
+    final ImagePicker picker = ImagePicker();
+    final XFile? foto = await picker.pickImage(
+      source: ImageSource.camera,
+      imageQuality: 75,
+    );
+
+    if (foto != null) {
+      setState(() {
+        _imagenSeleccionada = File(foto.path);
+      });
+    }
+  }
+*/
 
   Future<void> _enviarReporte() async {
     if (selectedCategory.isEmpty) {
@@ -259,6 +326,41 @@ class _ReportViewState extends State<ReportView> {
                   ),
                 ),
               ),
+
+              const SizedBox(height: 16),
+              GestureDetector(
+                onTap: _mostrarOpciones,
+                child: _imagenSeleccionada != null
+                    ? ClipRRect(
+                  borderRadius: BorderRadius.circular(12),
+                  child: Image.file(
+                    _imagenSeleccionada!,
+                    height: 200,
+                    fit: BoxFit.cover,
+                  ),
+                )
+                    : ClipRRect(
+                  borderRadius: BorderRadius.circular(12),
+                  child: Image.asset(
+                    'assets/default_reporte.png',
+                    height: 200,
+                    fit: BoxFit.cover,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'Toca la imagen para cambiarla',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 13,
+                  fontStyle: FontStyle.italic,
+                  color: Colors.black87,
+                ),
+              ),
+              const SizedBox(height: 30),
+
+
               const SizedBox(height: 30),
               Row(
                 children: [

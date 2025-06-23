@@ -4,6 +4,7 @@ import com.ufro.model.Reporte;
 import com.ufro.service.ReporteService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.Map;
@@ -56,16 +57,39 @@ public class ReporteController {
     public String actualizarEstado(@PathVariable String id) throws ExecutionException, InterruptedException {
         return reporteService.actualizarEstado(id);
     }
-
+/* servicio borrado
     @GetMapping
     public List<Reporte> obtenerTodosLosReportes() throws ExecutionException, InterruptedException {
         return reporteService.obtenerTodosLosReportes();
     }
-
+*/
     @DeleteMapping("/{reporteId}")
     public String eliminarReporte(@PathVariable String reporteId) throws ExecutionException, InterruptedException {
         return reporteService.eliminarReporte(reporteId);
     }
+
+    @DeleteMapping("/{reporteId}/foto")
+    public ResponseEntity<String> eliminarFotoReporte(@PathVariable String reporteId) {
+        try {
+            reporteService.eliminarFotoReporte(reporteId);
+            return ResponseEntity.ok("Foto del reporte eliminada correctamente");
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Error al eliminar la foto del reporte: " + e.getMessage());
+        }
+    }
+
+    @PostMapping("/{reporteId}/foto")
+    public ResponseEntity<String> actualizarFotoReporte(
+            @PathVariable String reporteId,
+            @RequestParam("foto") MultipartFile foto) {
+        try {
+            String photoUrl = reporteService.actualizarFotoReporte(reporteId, foto);
+            return ResponseEntity.ok(photoUrl);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Error al actualizar la foto del reporte: " + e.getMessage());
+        }
+    }
+
 
     @PatchMapping("/{reporteId}")
     public String editarParcialmente(@PathVariable String reporteId, @RequestBody Map<String, Object> campos) throws ExecutionException, InterruptedException {

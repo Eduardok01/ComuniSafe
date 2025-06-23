@@ -1,5 +1,6 @@
 package com.ufro.service;
 
+import com.google.cloud.firestore.DocumentSnapshot;
 import com.ufro.model.Reporte;
 import com.google.api.core.ApiFuture;
 import com.google.cloud.Timestamp;
@@ -9,7 +10,9 @@ import com.google.cloud.firestore.WriteResult;
 import com.google.firebase.cloud.FirestoreClient;
 import com.ufro.model.Reporte;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.time.Instant;
 import java.util.Date;
 import java.util.List;
@@ -20,6 +23,11 @@ import java.util.concurrent.ExecutionException;
 public class ReporteService {
 
     private static final String COLLECTION_NAME = "reportes";
+    private final FirebaseStorageService storageService;
+
+    public ReporteService(FirebaseStorageService storageService) {
+        this.storageService = storageService;
+    }
 
     public String crearReporte(Reporte reporte) throws ExecutionException, InterruptedException {
         Firestore db = FirestoreClient.getFirestore();
@@ -50,6 +58,67 @@ public class ReporteService {
         ApiFuture<WriteResult> future = docRef.update(camposActualizados);
         return "Campos actualizados en: " + future.get().getUpdateTime();
     }
+
+    public String actualizarFotoReporte(String reporteId, MultipartFile foto) throws IOException, ExecutionException, InterruptedException {
+        if (foto == null || foto.isEmpty()) {
+            throw new IllegalArgumentException("La foto no puede estar vacía");
+        }
+        if (reporteId == null || reporteId.trim().isEmpty()) {
+            throw new IllegalArgumentException("El ID del reporte es requerido");
+        }
+
+        try {
+            // Subir nueva foto
+            String photoUrl = storageService.uploadReportPhoto(foto, reporteId);
+
+            // Actualizar en Firestore
+            Firestore db = FirestoreClient.getFirestore();
+            DocumentReference docRef = db.collection("reportes").document(reporteId);
+
+            // Eliminar imagen anterior si existe
+            DocumentSnapshot doc = docRef.get().get();
+            if (doc.exists()) {
+                String oldPhotoUrl = doc.getString("photoUrl");
+                if (oldPhotoUrl != null) {
+                    storageService.deleteProfilePhoto(oldPhotoUrl); // Reutiliza deleteProfilePhoto
+                }
+            }
+
+            docRef.update("photoUrl", photoUrl).get();
+
+            return photoUrl;
+        } catch (Exception e) {
+            throw new RuntimeException("Error al actualizar la foto del reporte: " + e.getMessage(), e);
+        }
+    }
+
+    public void eliminarFotoReporte(String reporteId) throws ExecutionException, InterruptedException {
+        if (reporteId == null || reporteId.trim().isEmpty()) {
+            throw new IllegalArgumentException("El ID del reporte es requerido");
+        }
+
+        try {
+            Firestore db = FirestoreClient.getFirestore();
+            DocumentReference docRef = db.collection("reportes").document(reporteId);
+
+            DocumentSnapshot doc = docRef.get().get();
+            if (doc.exists()) {
+                String photoUrl = doc.getString("photoUrl");
+                if (photoUrl != null) {
+                    // Eliminar la foto del storage
+                    storageService.deleteProfilePhoto(photoUrl);
+
+                    // Actualizar el reporte sin foto
+                    docRef.update("photoUrl", null).get();
+                }
+            } else {
+                throw new IllegalArgumentException("Reporte no encontrado");
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("Error al eliminar la foto del reporte: " + e.getMessage(), e);
+        }
+    }
+
 
   /*
    public String crearReporte(Reporte reporte) throws ExecutionException, InterruptedException {

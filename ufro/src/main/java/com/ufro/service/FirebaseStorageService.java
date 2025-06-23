@@ -38,4 +38,19 @@ public class FirebaseStorageService {
             }
         }
     }
+
+    public String uploadReportPhoto(MultipartFile file, String reporteId) throws IOException {
+        String fileName = "report-photos/" + reporteId + "_" + UUID.randomUUID().toString();
+
+        Bucket bucket = StorageClient.getInstance().bucket(BUCKET_NAME);
+        BlobId blobId = BlobId.of(BUCKET_NAME, fileName);
+        BlobInfo blobInfo = BlobInfo.newBuilder(blobId)
+                .setContentType(file.getContentType())
+                .build();
+
+        bucket.getStorage().create(blobInfo, file.getBytes());
+
+        return String.format("https://storage.googleapis.com/%s/%s", BUCKET_NAME, fileName);
+    }
+
 }

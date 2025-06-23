@@ -17,4 +17,6 @@ public class Reporte {
     private String direccion;
     private Date fechaHora;
     private String usuarioId;
+
+    private String photoUrl;
 }
