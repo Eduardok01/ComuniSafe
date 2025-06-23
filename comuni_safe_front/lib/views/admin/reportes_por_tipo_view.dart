@@ -212,7 +212,9 @@ class _ReportesPorTipoViewState extends State<ReportesPorTipoView> {
                   contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                   title: Text(reporte.descripcion, style: const TextStyle(fontWeight: FontWeight.bold)),
                   subtitle: Text(
-                    'Dirección: ${reporte.direccion}\nPendiente: ${reporte.pendiente ? "Sí" : "No"}',
+                    'Dirección: ${reporte.direccion}\n'
+                        'Pendiente: ${reporte.pendiente ? "Sí" : "No"}\n'
+                        'Reportado por: ${reporte.nombreUsuario ?? reporte.usuarioId}',
                   ),
                   isThreeLine: true,
                   trailing: Row(

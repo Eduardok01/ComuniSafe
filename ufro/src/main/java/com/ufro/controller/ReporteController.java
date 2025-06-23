@@ -4,7 +4,7 @@ import com.ufro.model.Reporte;
 import com.ufro.service.ReporteService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
+import com.ufro.dto.ReporteConUsuarioDTO;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -68,7 +68,7 @@ public class ReporteController {
     @GetMapping("/tipo/{tipo}")
     public ResponseEntity<?> obtenerReportesPorTipo(@PathVariable String tipo) {
         try {
-            List<Reporte> reportesFiltrados = reporteService.obtenerReportesPorTipo(tipo.toLowerCase());
+            List<ReporteConUsuarioDTO> reportesFiltrados = reporteService.obtenerReportesConUsuarioPorTipo(tipo.toLowerCase());
             return ResponseEntity.ok(reportesFiltrados);
         } catch (ExecutionException | InterruptedException e) {
             e.printStackTrace();
@@ -90,4 +90,16 @@ public class ReporteController {
             return ResponseEntity.status(500).body("Error al contar reportes por tipo: " + e.getMessage());
         }
     }
+    @GetMapping("/usuario/{usuarioId}/activos")
+    public ResponseEntity<?> obtenerReportesActivosPorUsuario(@PathVariable String usuarioId) {
+        try {
+            List<Reporte> reportes = reporteService.obtenerReportesActivosPorUsuario(usuarioId);
+            return ResponseEntity.ok(reportes);
+        } catch (ExecutionException | InterruptedException e) {
+            e.printStackTrace();
+            return ResponseEntity.status(500).body("Error al obtener reportes: " + e.getMessage());
+        }
+    }
+
+
 }

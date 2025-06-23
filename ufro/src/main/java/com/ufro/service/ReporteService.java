@@ -1,23 +1,15 @@
 package com.ufro.service;
 
-import com.ufro.model.Reporte;
 import com.google.api.core.ApiFuture;
 import com.google.cloud.Timestamp;
-import com.google.cloud.firestore.AggregateQuery;
-import com.google.cloud.firestore.AggregateQuerySnapshot;
-import com.google.cloud.firestore.DocumentReference;
-import com.google.cloud.firestore.Firestore;
-import com.google.cloud.firestore.QueryDocumentSnapshot;
-import com.google.cloud.firestore.QuerySnapshot;
-import com.google.cloud.firestore.WriteResult;
+import com.google.cloud.firestore.*;
 import com.google.firebase.cloud.FirestoreClient;
+import com.ufro.dto.ReporteConUsuarioDTO;
+import com.ufro.model.Reporte;
 import org.springframework.stereotype.Service;
 
 import java.time.ZoneOffset;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ExecutionException;
 
 @Service
@@ -106,6 +98,51 @@ public class ReporteService {
         return snapshot.getCount();
     }
 
+    public List<ReporteConUsuarioDTO> obtenerReportesConUsuarioPorTipo(String tipo) throws ExecutionException, InterruptedException {
+        List<Reporte> reportes = obtenerReportesPorTipo(tipo);
+        List<ReporteConUsuarioDTO> listaDTO = new ArrayList<>();
+        Firestore db = FirestoreClient.getFirestore();
+
+        for (Reporte reporte : reportes) {
+            String uid = reporte.getUsuarioId();
+            String nombre = "Desconocido";
+            String correo = "Desconocido";
+            String rol = "Desconocido";
+
+            try {
+                DocumentSnapshot userDoc = db.collection("usuarios").document(uid).get().get();
+                if (userDoc.exists()) {
+                    nombre = userDoc.getString("name");
+                    correo = userDoc.getString("correo");
+                    rol = userDoc.getString("rol");
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+            ReporteConUsuarioDTO dto = new ReporteConUsuarioDTO();
+            dto.setId(reporte.getId()); // Aquí asignamos el ID importante para la eliminación en frontend
+            dto.setTipo(reporte.getTipo());
+            dto.setDescripcion(reporte.getDescripcion());
+            dto.setPendiente(reporte.getPendiente());
+            dto.setLatitud(reporte.getLatitud());
+            dto.setLongitud(reporte.getLongitud());
+            dto.setDireccion(reporte.getDireccion());
+            dto.setFechaHora(Timestamp.ofTimeSecondsAndNanos(
+                    reporte.getFechaHora().toEpochSecond(ZoneOffset.UTC),
+                    reporte.getFechaHora().getNano()
+            ));
+            dto.setUsuarioId(reporte.getUsuarioId());
+            dto.setNombreUsuario(nombre);
+            dto.setCorreoUsuario(correo);
+            dto.setRolUsuario(rol);
+
+            listaDTO.add(dto);
+        }
+
+        return listaDTO;
+    }
+
     private Map<String, Object> construirMapaReporte(Reporte reporte) {
         Map<String, Object> datos = new HashMap<>();
         datos.put("id", reporte.getId());
@@ -115,6 +152,7 @@ public class ReporteService {
         datos.put("latitud", reporte.getLatitud());
         datos.put("longitud", reporte.getLongitud());
         datos.put("direccion", reporte.getDireccion());
+
         if (reporte.getFechaHora() != null) {
             long epochSecond = reporte.getFechaHora().atZone(ZoneOffset.UTC).toInstant().getEpochSecond();
             int nano = reporte.getFechaHora().getNano();
@@ -126,4 +164,40 @@ public class ReporteService {
         datos.put("usuarioId", reporte.getUsuarioId());
         return datos;
     }
+    public List<Reporte> obtenerReportesActivosPorUsuario(String usuarioId) throws ExecutionException, InterruptedException {
+        Firestore db = FirestoreClient.getFirestore();
+        QuerySnapshot querySnapshot = db.collection(COLLECTION_NAME)
+                .whereEqualTo("usuarioId", usuarioId)
+                .whereEqualTo("pendiente", true)
+                .get()
+                .get();
+
+        List<Reporte> lista = new ArrayList<>();
+        for (QueryDocumentSnapshot doc : querySnapshot.getDocuments()) {
+            Map<String, Object> data = doc.getData();
+
+            Reporte reporte = new Reporte();
+            reporte.setId(doc.getId());
+            reporte.setTipo((String) data.get("tipo"));
+            reporte.setDescripcion((String) data.get("descripcion"));
+            reporte.setPendiente((Boolean) data.get("pendiente"));
+            reporte.setLatitud(data.get("latitud") != null ? ((Number) data.get("latitud")).doubleValue() : null);
+            reporte.setLongitud(data.get("longitud") != null ? ((Number) data.get("longitud")).doubleValue() : null);
+            reporte.setDireccion((String) data.get("direccion"));
+
+            Timestamp ts = (Timestamp) data.get("fechaHora");
+            if (ts != null) {
+                reporte.setFechaHora(ts.toDate().toInstant().atZone(ZoneOffset.UTC).toLocalDateTime());
+            } else {
+                reporte.setFechaHora(null);
+            }
+
+            reporte.setUsuarioId((String) data.get("usuarioId"));
+
+            lista.add(reporte);
+        }
+        return lista;
+    }
+
+
 }

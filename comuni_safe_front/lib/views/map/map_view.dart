@@ -45,7 +45,7 @@ class _MapViewState extends State<MapView> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Mapa en tiempo real'),
+        title: const Text('Vista Mapa'),
         backgroundColor: const Color(0xFFE2734B),
       ),
       body: userLocation == null
@@ -86,7 +86,7 @@ class _MapViewState extends State<MapView> {
             right: 20,
             child: ElevatedButton(
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.redAccent,
+                backgroundColor: const Color(0xFFE2734B),
                 padding: const EdgeInsets.symmetric(vertical: 16),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
@@ -97,7 +97,7 @@ class _MapViewState extends State<MapView> {
               },
               child: const Text(
                 'Reportar',
-                style: TextStyle(fontSize: 18, color: Colors.white),
+                style: TextStyle(fontSize: 18, color: Colors.black),
               ),
             ),
           ),
