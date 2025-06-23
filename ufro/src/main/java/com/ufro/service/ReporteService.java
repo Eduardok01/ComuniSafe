@@ -1,16 +1,15 @@
 package com.ufro.service;
 
+import com.google.cloud.firestore.*;
 import com.ufro.model.Reporte;
 import com.google.api.core.ApiFuture;
 import com.google.cloud.Timestamp;
-import com.google.cloud.firestore.DocumentReference;
-import com.google.cloud.firestore.Firestore;
-import com.google.cloud.firestore.WriteResult;
 import com.google.firebase.cloud.FirestoreClient;
 import com.ufro.model.Reporte;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -49,6 +48,23 @@ public class ReporteService {
         DocumentReference docRef = db.collection("reportes").document(reporteId);
         ApiFuture<WriteResult> future = docRef.update(camposActualizados);
         return "Campos actualizados en: " + future.get().getUpdateTime();
+    }
+
+
+
+    public List<Reporte> obtenerReportesPorUsuario(String uid) throws ExecutionException, InterruptedException {
+        Firestore db = FirestoreClient.getFirestore();
+        ApiFuture<QuerySnapshot> future = db.collection(COLLECTION_NAME)
+                .whereEqualTo("usuarioId", uid)
+                .orderBy("fechaHora", Query.Direction.DESCENDING)
+                .get();
+
+        List<Reporte> reportes = new ArrayList<>();
+        QuerySnapshot snapshots = future.get();
+        for (DocumentSnapshot doc : snapshots.getDocuments()) {
+            reportes.add(doc.toObject(Reporte.class));
+        }
+        return reportes;
     }
 
   /*
