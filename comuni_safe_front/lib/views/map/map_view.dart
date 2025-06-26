@@ -36,58 +36,75 @@ class _MapViewState extends State<MapView> {
   void _showPopupInfo(BuildContext context, Reporte reporte) {
     showDialog(
       context: context,
+      barrierDismissible: false,
       builder: (_) => AlertDialog(
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-          side: const BorderSide(color: Colors.black),
+          borderRadius: BorderRadius.circular(20),
         ),
-        backgroundColor: const Color(0xFFFEEED9), // Igual que admin
-        contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
-        content: SizedBox(
-          width: MediaQuery.of(context).size.width * 0.8,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                '${_tituloLegible(reporte.tipo)}',
-                style: const TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  fontFamily: 'Roboto',
-                ),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                'Descripción: ${reporte.descripcion}',
-                style: const TextStyle(
-                  fontSize: 16,
-                  fontFamily: 'Roboto',
-                ),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                'Fecha: ${_formatoFecha(reporte.fechaHora)}',
-                style: const TextStyle(
-                  fontSize: 16,
-                  fontFamily: 'Roboto',
-                ),
-              ),
-            ],
+        backgroundColor: const Color(0xFFFEF9F1), // mismo que en RegisterView
+        title: Center(
+          child: Text(
+            _tituloLegible(reporte.tipo),
+            style: const TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+              color: Colors.red,
+              fontFamily: 'Roboto',
+            ),
           ),
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const SizedBox(height: 8),
+            Text(
+              'Descripción:',
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 16,
+                color: Colors.grey[800],
+                fontFamily: 'Roboto',
+              ),
+            ),
+            Text(
+              reporte.descripcion,
+              style: const TextStyle(
+                fontSize: 16,
+                color: Colors.black,
+                fontFamily: 'Roboto',
+              ),
+            ),
+            const SizedBox(height: 12),
+            Text(
+              'Fecha:',
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 16,
+                color: Colors.grey[800],
+                fontFamily: 'Roboto',
+              ),
+            ),
+            Text(
+              _formatoFecha(reporte.fechaHora),
+              style: const TextStyle(
+                fontSize: 16,
+                color: Colors.black,
+                fontFamily: 'Roboto',
+              ),
+            ),
+          ],
         ),
         actions: [
           Center(
             child: TextButton(
               onPressed: () => Navigator.of(context).pop(),
-              style: TextButton.styleFrom(
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-              ),
               child: const Text(
                 'Cerrar',
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
                   fontSize: 16,
+                  color: Colors.blue,
                   fontFamily: 'Roboto',
                 ),
               ),
