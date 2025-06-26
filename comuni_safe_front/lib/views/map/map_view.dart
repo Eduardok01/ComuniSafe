@@ -37,19 +37,67 @@ class _MapViewState extends State<MapView> {
     showDialog(
       context: context,
       builder: (_) => AlertDialog(
-        title: Text('Reporte: ${reporte.tipo}'),
-        content: Text(reporte.descripcion.isNotEmpty
-            ? reporte.descripcion
-            : 'Sin descripción.'),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+          side: const BorderSide(color: Colors.black),
+        ),
+        backgroundColor: const Color(0xFFFEEED9), // Igual que admin
+        contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+        content: SizedBox(
+          width: MediaQuery.of(context).size.width * 0.8,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                '${_tituloLegible(reporte.tipo)}',
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  fontFamily: 'Roboto',
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'Descripción: ${reporte.descripcion}',
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontFamily: 'Roboto',
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'Fecha: ${_formatoFecha(reporte.fechaHora)}',
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontFamily: 'Roboto',
+                ),
+              ),
+            ],
+          ),
+        ),
         actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Cerrar'),
+          Center(
+            child: TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              style: TextButton.styleFrom(
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              ),
+              child: const Text(
+                'Cerrar',
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 16,
+                  fontFamily: 'Roboto',
+                ),
+              ),
+            ),
           ),
         ],
       ),
     );
   }
+
 
 
   @override
@@ -59,6 +107,28 @@ class _MapViewState extends State<MapView> {
     _getUserLocation().then((_) {
       fetchReportesActivos();
     });
+  }
+
+  String _tituloLegible(String tipo) {
+    switch (tipo) {
+      case 'microtrafico':
+        return 'Microtráfico';
+      case 'uso_indebido':
+        return 'Uso indebido de espacios';
+      case 'robo':
+        return 'Robo o Asalto';
+      case 'medica':
+        return 'Emergencia médica';
+      default:
+        return tipo;
+    }
+  }
+
+  String _formatoFecha(DateTime fecha) {
+    return '${fecha.day.toString().padLeft(2, '0')}/'
+        '${fecha.month.toString().padLeft(2, '0')}/'
+        '${fecha.year} ${fecha.hour.toString().padLeft(2, '0')}:'
+        '${fecha.minute.toString().padLeft(2, '0')}';
   }
 
 
