@@ -19,6 +19,10 @@ class _RegisterViewState extends State<RegisterView> {
   final TextEditingController phoneController = TextEditingController();
 
   final _emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
+  final _nameRegex = RegExp(r'^[A-Za-zÀ-ÿ]+(\s[A-Za-zÀ-ÿ]+)+$');
+  // Cambié el regex para que valide +569 seguido de 8 dígitos
+  final _chileMobilePhoneRegex = RegExp(r'^\+569\d{8}$');
+  final _passwordRegex = RegExp(r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{6,}$');
 
   Future<void> _showMessageDialog(String title, String message, {Color? titleColor}) {
     return showDialog(
@@ -56,11 +60,16 @@ class _RegisterViewState extends State<RegisterView> {
     final String email = emailController.text.trim();
     final String password = passwordController.text;
     final String confirmPassword = confirmPasswordController.text;
-    final String phone = phoneController.text.trim();
+    final String phone = '+56${phoneController.text.trim()}'; // agrego +56 fijo
     final String name = nameController.text.trim();
 
-    if (email.isEmpty || password.isEmpty || confirmPassword.isEmpty || phone.isEmpty || name.isEmpty) {
+    if (email.isEmpty || password.isEmpty || confirmPassword.isEmpty || phoneController.text.isEmpty || name.isEmpty) {
       await _showMessageDialog('Campos incompletos', 'Por favor, completa todos los campos', titleColor: Colors.red);
+      return;
+    }
+
+    if (!_nameRegex.hasMatch(name)) {
+      await _showMessageDialog('Nombre inválido', 'Debe ingresar nombre y apellido válidos', titleColor: Colors.red);
       return;
     }
 
@@ -69,8 +78,21 @@ class _RegisterViewState extends State<RegisterView> {
       return;
     }
 
-    if (password.length < 8) {
-      await _showMessageDialog('Contraseña débil', 'La contraseña debe tener al menos 8 caracteres', titleColor: Colors.red);
+    if (!_chileMobilePhoneRegex.hasMatch(phone)) {
+      await _showMessageDialog(
+        'Teléfono inválido',
+        'Por favor, ingresa un número de teléfono válido (ej: 912345678)',
+        titleColor: Colors.red,
+      );
+      return;
+    }
+
+    if (!_passwordRegex.hasMatch(password)) {
+      await _showMessageDialog(
+        'Contraseña inválida',
+        'Debe cumplir con los requisitos',
+        titleColor: Colors.red,
+      );
       return;
     }
 
@@ -95,6 +117,8 @@ class _RegisterViewState extends State<RegisterView> {
         body: jsonEncode({
           'name': name,
           'phone': phone,
+          'correo': email,
+          'password': password,
         }),
       );
 
@@ -143,11 +167,40 @@ class _RegisterViewState extends State<RegisterView> {
                     ),
                   ),
                   const SizedBox(height: 24),
+
                   buildTextField(label: 'Nombre completo', controller: nameController),
-                  buildTextField(label: 'Correo electrónico', controller: emailController),
+
+                  buildTextField(label: 'Correo electrónico',
+                      controller: emailController,
+                      keyboardType: TextInputType.emailAddress),
+                  const Align(
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      'Ejemplo: usuario@ejemplo.com',
+                      style: TextStyle(fontSize: 12, color: Colors.grey),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+
                   buildTextField(label: 'Contraseña', controller: passwordController, obscureText: true),
+                  const Align(
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      'Mínimo 6 caracteres\nDebe incluir una letra mayúscula y minúscula\nDebe contener al menos un símbolo "@!#\$%"',
+                      style: TextStyle(fontSize: 12, color: Colors.grey),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+
                   buildTextField(label: 'Confirmar contraseña', controller: confirmPasswordController, obscureText: true),
-                  buildTextField(label: 'Teléfono', controller: phoneController, keyboardType: TextInputType.phone),
+
+                  buildPhoneField(controller: phoneController),
+
+                  const SizedBox(height: 4),
+                  const Align(
+                    alignment: Alignment.centerLeft,
+                  ),
+
                   const SizedBox(height: 24),
                   ElevatedButton(
                     onPressed: _register,
@@ -178,15 +231,38 @@ class _RegisterViewState extends State<RegisterView> {
     required TextEditingController controller,
     bool obscureText = false,
     TextInputType keyboardType = TextInputType.text,
+    double paddingBottom = 6, // nuevo
   }) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 16),
+      padding: EdgeInsets.only(bottom: paddingBottom),
       child: TextField(
         controller: controller,
         obscureText: obscureText,
         keyboardType: keyboardType,
         decoration: InputDecoration(
           labelText: label,
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        ),
+      ),
+    );
+  }
+
+
+  Widget buildPhoneField({
+    required TextEditingController controller,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 0),
+      child: TextField(
+        controller: controller,
+        keyboardType: TextInputType.phone,
+        maxLength: 9,
+        decoration: InputDecoration(
+          labelText: 'Teléfono',
+          prefixText: '+56 ',
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
           ),

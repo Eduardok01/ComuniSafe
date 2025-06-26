@@ -180,10 +180,10 @@ class _LoginFormState extends State<LoginForm> {
           ),
         ),
         const SizedBox(height: 8),
-        TextButton(
+        /*TextButton(
           onPressed: () {},
           child: const Text('¿Olvidó su contraseña?'),
-        ),
+        )*/
         const SizedBox(height: 12),
         ElevatedButton.icon(
           onPressed: _signInWithGoogle,

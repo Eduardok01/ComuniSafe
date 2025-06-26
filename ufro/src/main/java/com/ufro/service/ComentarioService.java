@@ -17,10 +17,9 @@ public class ComentarioService {
         CollectionReference comentariosRef = db.collection("reportes").document(reporteId).collection("comentarios");
 
         DocumentReference nuevoComentario = comentariosRef.document();
-        comentario.setId(nuevoComentario.getId());
 
         ApiFuture<WriteResult> future = nuevoComentario.set(comentario);
-        return "Comentario agregado en: " + future.get().getUpdateTime();
+        return "Comentario agregado en: " + reporteId;
     }
 
     public List<Comentario> obtenerComentarios(String reporteId) throws ExecutionException, InterruptedException {
