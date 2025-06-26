@@ -21,9 +21,19 @@ rootProject.layout.buildDirectory.value(newBuildDir)
 subprojects {
     val newSubprojectBuildDir = newBuildDir.dir(project.name)
     project.layout.buildDirectory.value(newSubprojectBuildDir)
-}
 
-subprojects {
+    project.afterEvaluate {
+        // Evita errores si la app está configurando shrinkResources sin minifyEnabled
+        if (project.name == "app") {
+            project.extensions.configure<com.android.build.gradle.AppExtension>("android") {
+                buildTypes.getByName("release").apply {
+                    isMinifyEnabled = false
+                    isShrinkResources = false // Desactivado para evitar error de compilación
+                }
+            }
+        }
+    }
+
     project.evaluationDependsOn(":app")
 }
 
