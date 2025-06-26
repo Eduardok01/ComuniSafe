@@ -164,6 +164,42 @@ public class ReporteService {
         datos.put("usuarioId", reporte.getUsuarioId());
         return datos;
     }
+    public List<Reporte> obtenerTodosLosReportesActivos() throws ExecutionException, InterruptedException {
+        Firestore db = FirestoreClient.getFirestore();
+        QuerySnapshot querySnapshot = db.collection(COLLECTION_NAME)
+                .whereEqualTo("pendiente", true)
+                .get()
+                .get();
+
+        List<Reporte> lista = new ArrayList<>();
+        for (QueryDocumentSnapshot doc : querySnapshot.getDocuments()) {
+            Map<String, Object> data = doc.getData();
+
+            Reporte reporte = new Reporte();
+            reporte.setId(doc.getId());
+            reporte.setTipo((String) data.get("tipo"));
+            reporte.setDescripcion((String) data.get("descripcion"));
+            reporte.setPendiente((Boolean) data.get("pendiente"));
+            reporte.setLatitud(data.get("latitud") != null ? ((Number) data.get("latitud")).doubleValue() : null);
+            reporte.setLongitud(data.get("longitud") != null ? ((Number) data.get("longitud")).doubleValue() : null);
+            reporte.setDireccion((String) data.get("direccion"));
+
+            Timestamp ts = (Timestamp) data.get("fechaHora");
+            if (ts != null) {
+                reporte.setFechaHora(ts.toDate().toInstant().atZone(ZoneOffset.UTC).toLocalDateTime());
+            } else {
+                reporte.setFechaHora(null);
+            }
+
+            reporte.setUsuarioId((String) data.get("usuarioId"));
+
+            lista.add(reporte);
+        }
+
+        return lista;
+    }
+
+
     public List<Reporte> obtenerReportesActivosPorUsuario(String usuarioId) throws ExecutionException, InterruptedException {
         Firestore db = FirestoreClient.getFirestore();
         QuerySnapshot querySnapshot = db.collection(COLLECTION_NAME)
