@@ -6,6 +6,7 @@ import 'package:comuni_safe_front/views/home/emergency_contacts_view.dart';
 import 'package:comuni_safe_front/views/profile/profile_view.dart';  // <-- Importa ProfileView
 import '../views/home/admin_home_view.dart';
 import 'package:comuni_safe_front/views/map/map_view.dart';
+import '../views/tutorial/TutorialView.dart';
 
 import '../views/reports/report_view.dart';
 
@@ -18,4 +19,5 @@ final Map<String, WidgetBuilder> appRoutes = {
   'profile': (context) => const ProfileView(),  // <-- Agrega la ruta para ProfileView
   'map': (context) => const MapView(),
   'report': (context) => const ReportView(),
+  'tutorial': (BuildContext context) => const TutorialView(),
 };
