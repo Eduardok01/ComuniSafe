@@ -101,5 +101,16 @@ public class ReporteController {
         }
     }
 
+    @GetMapping("/activos")
+    public ResponseEntity<?> obtenerTodosLosReportesActivos() {
+        try {
+            List<Reporte> reportes = reporteService.obtenerTodosLosReportesActivos();
+            return ResponseEntity.ok(reportes);
+        } catch (ExecutionException | InterruptedException e) {
+            e.printStackTrace();
+            return ResponseEntity.status(500).body("Error al obtener reportes activos: " + e.getMessage());
+        }
+    }
+
 
 }

@@ -2,6 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+import '../../config/env_config.dart';
+import '../../models/reporte.dart';
 
 class MapView extends StatefulWidget {
   const MapView({super.key});
@@ -12,12 +16,51 @@ class MapView extends StatefulWidget {
 
 class _MapViewState extends State<MapView> {
   LatLng? userLocation;
+  List<Marker> reportMarkers = [];
 
+  ImageProvider getIconForTipo(String tipo) {
+    switch (tipo) {
+      case 'microtrafico':
+        return const AssetImage('assets/microtrafico.png');
+      case 'robo':
+        return const AssetImage('assets/robo.png');
+      case 'medica':
+        return const AssetImage('assets/ambulancia.png');
+      case 'uso_indebido':
+        return const AssetImage('assets/espacios.png');
+      default:
+        return const AssetImage('assets/default.png');
+    }
+  }
+
+  void _showPopupInfo(BuildContext context, Reporte reporte) {
+    showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: Text('Reporte: ${reporte.tipo}'),
+        content: Text(reporte.descripcion.isNotEmpty
+            ? reporte.descripcion
+            : 'Sin descripción.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Cerrar'),
+          ),
+        ],
+      ),
+    );
+  }
+
+
+  @override
   @override
   void initState() {
     super.initState();
-    _getUserLocation();
+    _getUserLocation().then((_) {
+      fetchReportesActivos();
+    });
   }
+
 
   Future<void> _getUserLocation() async {
     bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
@@ -40,6 +83,46 @@ class _MapViewState extends State<MapView> {
       userLocation = LatLng(position.latitude, position.longitude);
     });
   }
+
+  Future<void> fetchReportesActivos() async {
+    try {
+      final response = await http.get(
+        Uri.parse('${EnvConfig.baseUrl}/api/reportes/activos'),
+        headers: {'Content-Type': 'application/json'},
+      );
+
+      if (response.statusCode == 200) {
+        final List<dynamic> data = json.decode(response.body);
+        List<Marker> nuevos = [];
+
+        for (var item in data) {
+          final reporte = Reporte.fromJson(item);
+          final icon = getIconForTipo(reporte.tipo);
+
+          nuevos.add(
+            Marker(
+              width: 48,
+              height: 48,
+              point: LatLng(reporte.latitud, reporte.longitud),
+              child: GestureDetector(
+                onTap: () => _showPopupInfo(context, reporte),
+                child: Image(image: icon),
+              ),
+            ),
+          );
+        }
+
+        if (mounted) {
+          setState(() {
+            reportMarkers = nuevos;
+          });
+        }
+      }
+    } catch (e) {
+      debugPrint('Error al cargar reportes: $e');
+    }
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -76,6 +159,7 @@ class _MapViewState extends State<MapView> {
                       size: 40,
                     ),
                   ),
+                  ...reportMarkers,
                 ],
               ),
             ],
