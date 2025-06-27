@@ -77,7 +77,7 @@ class _AdminHomeViewState extends State<AdminHomeView> {
               ElevatedButton.icon(
                 onPressed: () => Navigator.pushNamed(context, 'map'),
                 icon: const Icon(Icons.map),
-                label: const Text('Ver el mapa'),
+                label: const Text('Ver Mapa/Reportar'),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFFD26033),
                   foregroundColor: Colors.black,

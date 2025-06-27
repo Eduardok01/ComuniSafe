@@ -63,7 +63,7 @@ class HomeView extends StatelessWidget {
                     ),
                     _buildImageButton(
                       'assets/mapa-logo.png',
-                      'Ver el mapa',
+                      'Ver Mapa/Reportar',
                           () {
                         Navigator.pushNamed(context, 'map');
                       },
